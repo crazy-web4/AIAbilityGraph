@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.4 AI 安全与伦理 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .warning-box { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .danger-box { background: rgba(239, 68, 68, 0.15); border-left: 4px solid #ef4444; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .formula { font-size: 1.3em; text-align: center; padding: 0.5em; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 0.5em 0; }
+        .comparison-table { font-size: 0.6em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+        .tag { display: inline-block; background: rgba(59,130,246,0.2); color: #60a5fa; padding: 0.2em 0.6em; border-radius: 4px; font-size: 0.75em; margin-right: 0.3em; }
+        .tag.danger { background: rgba(239,68,68,0.2); color: #f87171; }
+        .tag.safe { background: rgba(16,185,129,0.2); color: #34d399; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- 封面 -->
+            <section>
+                <h1>⚖️ AI 安全与伦理</h1>
+                <h4>AI 能力图谱 · 第 1 章第 4 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>对抗攻击 · 公平性 · 可解释性 · 伦理规范</p>
+                    <p style="margin-top: 1em;">构建负责任的 AI 系统</p>
+                </div>
+            </section>
+
+            <!-- 学习目标 -->
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <p style="font-size: 0.9em;">学完本节后，你将能够：</p>
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解对抗攻击的原理与防御方法</li>
+                        <li>✅ 识别并缓解 AI 系统中的偏见问题</li>
+                        <li>✅ 应用可解释性工具分析模型决策</li>
+                        <li>✅ 掌握 AI 伦理框架与合规要求</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 为什么 AI 安全重要 -->
+            <section>
+                <h2>🚨 为什么 AI 安全重要？</h2>
+                <div class="two-column">
+                    <div class="danger-box">
+                        <h4>现实世界的攻击案例</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>自动驾驶误导（停车标志→限速标志）</li>
+                            <li>内容审核绕过</li>
+                            <li>人脸识别欺骗</li>
+                            <li>推荐系统操纵</li>
+                        </ul>
+                    </div>
+                    <div class="warning-box">
+                        <h4>偏见导致的伤害</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>招聘算法性别歧视</li>
+                            <li>信贷模型种族偏见</li>
+                            <li>医疗诊断对少数族裔准确率更低</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 对抗攻击 -->
+            <section>
+                <h2>1.4.1 对抗攻击与防御</h2>
+                <div class="highlight-box">
+                    <p><strong>对抗样本</strong>：在输入上添加人眼不可察觉的扰动，使模型产生错误输出</p>
+                </div>
+                <div class="formula">
+                    $$\mathbf{x}_{adv} = \mathbf{x} + \delta, \quad \|\delta\|_\infty \leq \epsilon$$
+                </div>
+                <div class="concept-card" style="margin-top: 0.8em;">
+                    <p style="font-size: 0.85em;">$$f(\mathbf{x}_{adv}) \neq f(\mathbf{x})$$</p>
+                </div>
+            </section>
+
+            <!-- FGSM 攻击 -->
+            <section>
+                <h3>FGSM 攻击</h3>
+                <div class="formula">
+                    $$\mathbf{x}_{adv} = \mathbf{x} + \epsilon \cdot \text{sign}(\nabla_\mathbf{x} J(\mathbf{x}, y))$$
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+def fgsm_attack(model, image, label, epsilon=0.02):
+    """
+    Fast Gradient Sign Method (FGSM) 攻击
+
+    参数:
+        model: 目标模型
+        image: 输入图像 (requires_grad=True)
+        label: 真实标签
+        epsilon: 扰动上限
+
+    返回:
+        adversarial_image: 对抗样本
+    """
+    model.eval()
+    image.requires_grad = True
+
+    # 前向传播
+    output = model(image)
+    loss = F.cross_entropy(output, label)
+
+    # 反向传播获取梯度
+    loss.backward()
+
+    # 生成对抗样本
+    image_adv = image + epsilon * image.grad.data.sign()
+
+    # 截断到合法范围 [0, 1]
+    image_adv = torch.clamp(image_adv, 0, 1)
+
+    return image_adv.detach()
+                </code></pre>
+            </section>
+
+            <!-- PGD 攻击 -->
+            <section>
+                <h3>PGD 攻击 - 更强的迭代攻击</h3>
+                <div class="highlight-box">
+                    <p><strong>Projected Gradient Descent</strong>：多步迭代攻击，比 FGSM 更强</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+def pgd_attack(model, image, label, epsilon=0.02, steps=10, alpha=0.005):
+    """
+    Projected Gradient Descent 攻击
+
+    参数:
+        steps: 迭代步数
+        alpha: 每步大小
+    """
+    model.eval()
+    image_adv = image.clone().detach().requires_grad_(True)
+
+    for _ in range(steps):
+        output = model(image_adv)
+        loss = F.cross_entropy(output, label)
+        loss.backward()
+
+        with torch.no_grad():
+            # 梯度上升
+            image_adv = image_adv + alpha * image_adv.grad.sign()
+
+            # 投影到 epsilon 球内
+            delta = image_adv - image
+            delta = torch.clamp(delta, -epsilon, epsilon)
+            image_adv = torch.clamp(image + delta, 0, 1)
+
+        image_adv.grad.zero_()
+
+    return image_adv.detach()
+                </code></pre>
+            </section>
+
+            <!-- 对抗攻防对比 -->
+            <section>
+                <h3>对抗攻防方法对比</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>强度</th>
+                            <th>速度</th>
+                            <th>防御难度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>FGSM</td>
+                            <td>⭐⭐</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                            <td>⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>PGD</td>
+                            <td>⭐⭐⭐⭐</td>
+                            <td>⭐⭐⭐</td>
+                            <td>⭐⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>CW Attack</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                            <td>⭐⭐</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>自适应攻击</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                            <td>⭐</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 防御方法 -->
+            <section>
+                <h3>防御方法</h3>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>对抗训练</h4>
+                        <p style="font-size: 0.75em;">将对抗样本加入训练集</p>
+                        <pre style="font-size: 0.65em;"><code>def adversarial_training_step(
+    model, images, labels,
+    optimizer, epsilon=0.02):
+
+    # 生成对抗样本
+    images_adv = fgsm_attack(
+        model, images, labels, epsilon)
+
+    # 用对抗样本训练
+    outputs = model(images_adv)
+    loss = F.cross_entropy(outputs, labels)
+    loss.backward()
+    optimizer.step()</code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>防御性蒸馏</h4>
+                        <p style="font-size: 0.75em;">软化输出分布，增加攻击难度</p>
+                        <div class="formula" style="font-size: 0.9em;">
+                            $$L = \alpha L_{hard} + (1-\alpha) L_{soft}$$
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 公平性与偏见 -->
+            <section>
+                <h2>1.4.2 AI 公平性与偏见</h2>
+                <div class="warning-box">
+                    <p><strong>偏见来源</strong>：</p>
+                    <ul style="font-size: 0.8em;">
+                        <li>📊 <strong>数据偏见</strong>：训练数据不具代表性</li>
+                        <li>🏷️ <strong>标签偏见</strong>：标注者的主观判断</li>
+                        <li>🔧 <strong>算法偏见</strong>：目标函数设计不当</li>
+                        <li>📈 <strong>评估偏见</strong>：测试集覆盖不全</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 公平性指标 -->
+            <section>
+                <h3>公平性评估指标</h3>
+                <pre><code class="python" data-trim data-noescape>
+class FairnessMetrics:
+    """AI 公平性评估指标"""
+
+    @staticmethod
+    def demographic_parity(y_true, y_pred, sensitive_attr):
+        """
+        人口统计学均等：不同群体获得正例的概率相同
+        P(Ŷ=1 | A=0) = P(Ŷ=1 | A=1)
+        """
+        groups = np.unique(sensitive_attr)
+        rates = []
+        for g in groups:
+            mask = sensitive_attr == g
+            rate = np.mean(y_pred[mask] == 1)
+            rates.append(rate)
+        # 差异越小越公平
+        return max(rates) - min(rates)
+
+    @staticmethod
+    def disparate_impact(y_pred, sensitive_attr):
+        """
+        不同影响率：保护群体与优势群体正例率的比值
+        0.8 规则：比值 < 0.8 认为存在歧视
+        """
+        groups = np.unique(sensitive_attr)
+        rates = [np.mean(y_pred[sensitive_attr == g] == 1) for g in groups]
+        return min(rates) / max(rates) if max(rates) > 0 else 0
+                </code></pre>
+            </section>
+
+            <!-- 偏见缓解技术 -->
+            <section>
+                <h3>偏见缓解技术</h3>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>数据层面 - 重采样</h4>
+                        <pre style="font-size: 0.65em;"><code>from imblearn.over_sampling import SMOTE
+
+def balance_dataset(X, y):
+    """使用 SMOTE 平衡不同群体的数据"""
+    smote = SMOTE(random_state=42)
+    X_balanced, y_balanced = smote.fit_resample(X, y)
+    return X_balanced, y_balanced</code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>算法层面 - 公平性约束</h4>
+                        <pre style="font-size: 0.65em;"><code>class FairClassifier:
+    def __init__(self, base_model,
+                 fairness_lambda=0.1):
+        self.model = base_model
+        self.lambda_ = fairness_lambda
+
+    def fair_loss(self, y_pred, y_true,
+                  sensitive_attr):
+        # 分类损失
+        cls_loss = F.cross_entropy(y_pred, y_true)
+        # 公平性损失
+        fair_loss = compute_group_disparity(...)
+        return cls_loss + self.lambda_ * fair_loss</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 可解释性 -->
+            <section>
+                <h2>1.4.3 模型可解释性</h2>
+                <div class="highlight-box">
+                    <p>为什么需要可解释性？</p>
+                    <ul style="font-size: 0.85em;">
+                        <li>🏥 医疗诊断：医生需要理解模型推理</li>
+                        <li>⚖️ 法律决策：需要解释拒绝贷款/工作的原因</li>
+                        <li>🔍 模型调试：找出错误预测的根源</li>
+                        <li>📋 合规要求：GDPR 等法规要求解释权</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- LIME -->
+            <section>
+                <h3>LIME - 局部可解释模型</h3>
+                <div class="concept-card">
+                    <h4>原理</h4>
+                    <p style="font-size: 0.8em;">用局部可解释模型（如线性模型）近似复杂模型的局部行为</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+import lime
+import lime.lime_tabular
+from sklearn.ensemble import RandomForestClassifier
+
+def explain_with_lime(model, X_train, X_test, feature_names, class_names):
+    """使用 LIME 解释模型预测"""
+    # 创建解释器
+    explainer = lime.lime_tabular.LimeTabularExplainer(
+        X_train,
+        feature_names=feature_names,
+        class_names=class_names,
+        mode='classification'
+    )
+
+    # 解释单个样本
+    sample_idx = 0
+    exp = explainer.explain_instance(
+        X_test[sample_idx],
+        model.predict_proba,
+        num_features=5
+    )
+
+    # 获取解释
+    print("Top 5 重要特征:")
+    for feature, importance in exp.as_list():
+        print(f"  {feature}: {importance:.4f}")
+
+    return exp
+                </code></pre>
+            </section>
+
+            <!-- SHAP -->
+            <section>
+                <h3>SHAP - Shapley 值解释</h3>
+                <div class="concept-card">
+                    <h4>基于博弈论的 Shapley 值分配特征贡献</h4>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+import shap
+
+def explain_with_shap(model, X_background, X_test, feature_names=None):
+    """使用 SHAP 解释模型"""
+    # 创建解释器（TreeExplainer 适用于树模型）
+    explainer = shap.TreeExplainer(model, X_background)
+
+    # 计算 SHAP 值
+    shap_values = explainer.shap_values(X_test)
+
+    # 可视化
+    shap.summary_plot(shap_values, X_test, feature_names=feature_names)
+    shap.dependence_plot(0, shap_values, X_test, feature_names=feature_names)
+
+    return shap_values
+
+# 深度学习模型 SHAP
+def explain_deep_model(model, X_background, X_test):
+    explainer = shap.DeepExplainer(model, X_background)
+    shap_values = explainer.shap_values(X_test)
+    shap.summary_plot(shap_values, X_test)
+                </code></pre>
+            </section>
+
+            <!-- 可解释性方法对比 -->
+            <section>
+                <h3>可解释性方法对比</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>模型无关</th>
+                            <th>局部/全局</th>
+                            <th>计算成本</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>LIME</td>
+                            <td>✅</td>
+                            <td>局部</td>
+                            <td>低</td>
+                            <td>快速解释单个预测</td>
+                        </tr>
+                        <tr>
+                            <td>SHAP</td>
+                            <td>✅</td>
+                            <td>局部 + 全局</td>
+                            <td>中</td>
+                            <td>特征重要性分析</td>
+                        </tr>
+                        <tr>
+                            <td>Attention</td>
+                            <td>❌</td>
+                            <td>全局</td>
+                            <td>低</td>
+                            <td>Transformer 模型</td>
+                        </tr>
+                        <tr>
+                            <td>Saliency Map</td>
+                            <td>❌</td>
+                            <td>局部</td>
+                            <td>低</td>
+                            <td>图像模型</td>
+                        </tr>
+                        <tr>
+                            <td>Partial Dependence</td>
+                            <td>✅</td>
+                            <td>全局</td>
+                            <td>高</td>
+                            <td>特征效应分析</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- AI 伦理框架 -->
+            <section>
+                <h2>1.4.4 AI 伦理框架</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>原则</th>
+                            <th>描述</th>
+                            <th>实践方法</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>有益性</strong></td>
+                            <td>AI 应造福人类</td>
+                            <td>影响评估、风险评估</td>
+                        </tr>
+                        <tr>
+                            <td><strong>非maleficence</strong></td>
+                            <td>不伤害原则</td>
+                            <td>安全测试、红队演练</td>
+                        </tr>
+                        <tr>
+                            <td><strong>自主性</strong></td>
+                            <td>尊重人类决策权</td>
+                            <td>人机协同、可退出机制</td>
+                        </tr>
+                        <tr>
+                            <td><strong>公正性</strong></td>
+                            <td>公平对待所有人</td>
+                            <td>偏见检测、多样化团队</td>
+                        </tr>
+                        <tr>
+                            <td><strong>透明性</strong></td>
+                            <td>决策过程可追溯</td>
+                            <td>文档记录、可解释性</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 负责任 AI 检查清单 -->
+            <section>
+                <h3>📋 负责任 AI 检查清单</h3>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>数据层面</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>✅ 数据来源合法且符合隐私法规</li>
+                            <li>✅ 数据覆盖多样人群，无明显偏差</li>
+                            <li>✅ 敏感属性（种族、性别等）已妥善处理</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>模型层面</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>✅ 已评估不同群体上的性能差异</li>
+                            <li>✅ 已测试对抗鲁棒性</li>
+                            <li>✅ 已生成可解释性报告</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>部署层面</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>✅ 有明确的使用场景和限制说明</li>
+                            <li>✅ 有人工审核/申诉机制</li>
+                            <li>✅ 有监控和回滚计划</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>合规层面</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>✅ 符合 GDPR/个人信息保护法</li>
+                            <li>✅ 通过伦理审查委员会审批</li>
+                            <li>✅ 有明确的责任归属</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 相关法规 -->
+            <section>
+                <h3>📜 相关法规</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>法规</th>
+                            <th>适用范围</th>
+                            <th>关键要求</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>GDPR</strong> (欧盟)</td>
+                            <td>在欧运营企业</td>
+                            <td>解释权、被遗忘权、数据可携带</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI Act</strong> (欧盟)</td>
+                            <td>AI 系统提供商</td>
+                            <td>风险分级、高风险系统严格监管</td>
+                        </tr>
+                        <tr>
+                            <td><strong>个人信息保护法</strong> (中国)</td>
+                            <td>在中国处理个人信息</td>
+                            <td>最小必要、知情同意、目的限制</td>
+                        </tr>
+                        <tr>
+                            <td><strong>算法推荐管理规定</strong> (中国)</td>
+                            <td>算法推荐服务</td>
+                            <td>透明、公平、不得诱导沉迷</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 常见误区 -->
+            <section>
+                <h2>⚠️ 常见误区</h2>
+                <div class="warning-box">
+                    <table class="comparison-table" style="font-size: 0.75em;">
+                        <thead>
+                            <tr>
+                                <th>误区</th>
+                                <th>正确理解</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>"对抗攻击只是理论问题"</td>
+                                <td>已有实际攻击案例（自动驾驶误导、内容审核绕过）</td>
+                            </tr>
+                            <tr>
+                                <td>"公平性只是政治正确"</td>
+                                <td>偏见导致法律风险、商业损失、用户流失</td>
+                            </tr>
+                            <tr>
+                                <td>"可解释性影响性能"</td>
+                                <td>可解释性与性能可兼得，且有助于调试</td>
+                            </tr>
+                            <tr>
+                                <td>"伦理审查拖慢进度"</td>
+                                <td>早期考虑伦理问题可避免后期返工</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 延伸阅读 -->
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>📘 《AI Ethics》- Virginia Dignum</li>
+                    <li>📘 《Weapons of Math Destruction》- Cathy O'Neil</li>
+                    <li>🌐 <a href="https://ai.google/responsibilities/responsible-ai-practices/" style="color: #3b82f6;">Google PAIR - Responsible AI Practices</a></li>
+                    <li>🌐 <a href="https://www.tensorflow.org/tfx/guide/fairness_indicators" style="color: #3b82f6;">Fairness Indicators - TensorFlow</a></li>
+                    <li>🌐 <a href="https://github.com/microsoft/responsible-ai-toolbox" style="color: #3b82f6;">Responsible AI Toolkit - Microsoft</a></li>
+                </ul>
+            </section>
+
+            <!-- 结束页 -->
+            <section>
+                <h2>🎉 完成第 1 章学习！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>恭喜完成 <strong>AI 基础理论</strong> 全部学习！</p>
+                    <p style="margin-top: 1em;">下一章：<strong>第 2 章 大模型核心技术</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="../chapter-2/2-1-architecture.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b; margin-right: 1em;">← 返回导航</a>
+                        <a href="../../docs/chapter-1/1-4-ai-ethics.md" style="color: #64748b;">查看文档</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="1-3-deep-learning.html">← 深度学习</a> |
+        <a href="../chapter-2/2-1-architecture.html">第 2 章 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            showSlideNumber: 'all',
+            controls: true,
+            progress: true,
+            center: true,
+            transition: 'slide',
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+    </script>
+</body>
+</html>

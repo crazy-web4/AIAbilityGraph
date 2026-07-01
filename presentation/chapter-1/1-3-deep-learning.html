@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.3 深度学习基础 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .warning-box { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .formula { font-size: 1.3em; text-align: center; padding: 0.5em; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 0.5em 0; }
+        .comparison-table { font-size: 0.6em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .three-column { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .architecture-diagram { background: rgba(255,255,255,0.03); padding: 1em; border-radius: 8px; font-family: monospace; font-size: 0.7em; text-align: center; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+        .tag { display: inline-block; background: rgba(59,130,246,0.2); color: #60a5fa; padding: 0.2em 0.6em; border-radius: 4px; font-size: 0.75em; margin-right: 0.3em; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- 封面 -->
+            <section>
+                <h1>🧠 深度学习基础</h1>
+                <h4>AI 能力图谱 · 第 1 章第 3 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>MLP · CNN · RNN · Transformer</p>
+                    <p style="margin-top: 1em;">从感知机到现代深度学习架构</p>
+                </div>
+            </section>
+
+            <!-- 学习目标 -->
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <p style="font-size: 0.9em;">学完本节后，你将能够：</p>
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 MLP 的结构与反向传播原理</li>
+                        <li>✅ 掌握 CNN 的核心组件（卷积、池化）及经典架构</li>
+                        <li>✅ 理解 RNN/LSTM/GRU 处理序列数据的机制</li>
+                        <li>✅ 掌握 Self-Attention 与 Transformer 架构</li>
+                        <li>✅ 使用 PyTorch 实现基础深度学习模型</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 深度学习发展史 -->
+            <section>
+                <h2>📈 深度学习发展简史</h2>
+                <div style="font-size: 0.75em; margin: 1em 0;">
+                    <div class="two-column">
+                        <div class="concept-card">
+                            <h4>1958 - 感知机</h4>
+                            <p>Rosenblatt 提出感知机模型</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>1986 - 反向传播</h4>
+                            <p>Rumelhart 重新发现 BP 算法</p>
+                        </div>
+                    </div>
+                    <div class="two-column">
+                        <div class="concept-card">
+                            <h4>1989 - CNN</h4>
+                            <p>LeCun 提出 LeNet</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>2012 - 深度学习爆发</h4>
+                            <p>AlexNet 赢得 ImageNet</p>
+                        </div>
+                    </div>
+                    <div class="two-column">
+                        <div class="concept-card">
+                            <h4>2014 - GAN/Transformer</h4>
+                            <p>生成对抗网络 / Attention 机制</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>2017 - Transformer</h4>
+                            <p>"Attention is All You Need"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 多层感知机 -->
+            <section>
+                <h2>1.3.1 多层感知机 (MLP)</h2>
+                <div class="architecture-diagram">
+                    <pre>
+输入层 → [线性层 + 激活] → [线性层 + 激活] → 输出层
+         ↓ 隐藏层 1        ↓ 隐藏层 2
+                    </pre>
+                </div>
+                <div class="formula">
+                    $$\mathbf{h}^{(l)} = \sigma(\mathbf{W}^{(l)}\mathbf{h}^{(l-1)} + \mathbf{b}^{(l)})$$
+                </div>
+            </section>
+
+            <!-- MLP PyTorch 实现 -->
+            <section>
+                <h3>MLP PyTorch 实现</h3>
+                <pre><code class="python" data-trim data-noescape>
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class MLP(nn.Module):
+    """
+    多层感知机示例
+    架构：Input -> Linear(784, 256) -> ReLU -> Linear(256, 128) -> ReLU -> Linear(128, 10)
+    """
+    def __init__(self, input_size=784, hidden_sizes=[256, 128], num_classes=10):
+        super(MLP, self).__init__()
+
+        layers = []
+        prev_size = input_size
+        for hidden_size in hidden_sizes:
+            layers.append(nn.Linear(prev_size, hidden_size))
+            layers.append(nn.ReLU())
+            layers.append(nn.Dropout(0.2))  # Dropout 防止过拟合
+            prev_size = hidden_size
+
+        layers.append(nn.Linear(prev_size, num_classes))
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, x):
+        x = x.view(x.size(0), -1)  # 展平输入
+        return self.network(x)
+
+# 创建模型
+model = MLP(input_size=784, hidden_sizes=[256, 128], num_classes=10)
+print(model)
+                </code></pre>
+            </section>
+
+            <!-- 激活函数对比 -->
+            <section>
+                <h3>激活函数对比</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>激活函数</th>
+                            <th>公式</th>
+                            <th>优点</th>
+                            <th>缺点</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sigmoid</td>
+                            <td>$\frac{1}{1+e^{-x}}$</td>
+                            <td>输出 (0,1)，概率解释</td>
+                            <td>梯度消失</td>
+                            <td>二分类输出层</td>
+                        </tr>
+                        <tr>
+                            <td>Tanh</td>
+                            <td>$\frac{e^x-e^{-x}}{e^x+e^{-x}}$</td>
+                            <td>零中心化</td>
+                            <td>梯度消失</td>
+                            <td>RNN</td>
+                        </tr>
+                        <tr>
+                            <td>ReLU</td>
+                            <td>$\max(0, x)$</td>
+                            <td>计算快、缓解梯度消失</td>
+                            <td>Dead ReLU</td>
+                            <td>默认选择</td>
+                        </tr>
+                        <tr>
+                            <td>GELU</td>
+                            <td>$x \cdot \Phi(x)$</td>
+                            <td>平滑、Transformer 标配</td>
+                            <td>计算稍慢</td>
+                            <td>Transformer</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- CNN -->
+            <section>
+                <h2>1.3.2 卷积神经网络 (CNN)</h2>
+                <div class="highlight-box">
+                    <p><strong>为什么 CNN 适合图像？</strong></p>
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 保留空间关系</li>
+                        <li>✅ 参数共享，效率高</li>
+                        <li>✅ 平移不变性</li>
+                    </ul>
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>卷积层</h4>
+                        <p style="font-size: 0.75em;">提取局部特征</p>
+                    </div>
+                    <div class="concept-card">
+                        <h4>池化层</h4>
+                        <p style="font-size: 0.75em;">降维、不变性</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 卷积操作 -->
+            <section>
+                <h3>Conv2d 参数详解</h3>
+                <pre><code class="python" data-trim data-noescape>
+import torch
+import torch.nn as nn
+
+# Conv2d 参数详解
+conv = nn.Conv2d(
+    in_channels=3,      # 输入通道数 (RGB 图像)
+    out_channels=64,    # 输出通道数 (滤波器数量)
+    kernel_size=3,      # 卷积核大小 3×3
+    stride=1,           # 步长
+    padding=1,          # 填充 (保持尺寸)
+    bias=True           # 是否加偏置
+)
+
+# 输入：(batch, channels, height, width)
+input_tensor = torch.randn(32, 3, 224, 224)  # 32 张 224×224 RGB 图像
+output = conv(input_tensor)
+
+print(f"输出形状：{output.shape}")  # (32, 64, 224, 224)
+
+# 输出尺寸计算公式
+# Output = floor((Input - Kernel + 2×Padding) / Stride) + 1
+                </code></pre>
+            </section>
+
+            <!-- 经典 CNN 架构 -->
+            <section>
+                <h3>经典 CNN 架构演变</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>架构</th>
+                            <th>年份</th>
+                            <th>核心贡献</th>
+                            <th>层数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>LeNet-5</td>
+                            <td>1998</td>
+                            <td>首个成功 CNN，手写数字识别</td>
+                            <td>7 层</td>
+                        </tr>
+                        <tr>
+                            <td>AlexNet</td>
+                            <td>2012</td>
+                            <td>ReLU、Dropout、GPU 训练</td>
+                            <td>8 层</td>
+                        </tr>
+                        <tr>
+                            <td>VGG</td>
+                            <td>2014</td>
+                            <td>统一 3×3 卷积，深度增加</td>
+                            <td>16-19 层</td>
+                        </tr>
+                        <tr>
+                            <td>ResNet</td>
+                            <td>2015</td>
+                            <td>残差连接，解决梯度消失</td>
+                            <td>50-152 层</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- RNN -->
+            <section>
+                <h2>1.3.3 循环神经网络 (RNN)</h2>
+                <div class="highlight-box">
+                    <p><strong>适用场景</strong>：序列数据（文本、语音、时间序列）</p>
+                </div>
+                <div class="formula">
+                    $$h_t = \tanh(W_{xh}x_t + W_{hh}h_{t-1} + b_h)$$
+                </div>
+                <div class="concept-card">
+                    <h4>核心思想</h4>
+                    <p style="font-size: 0.8em;">隐藏状态传递历史信息，实现"记忆"功能</p>
+                </div>
+            </section>
+
+            <!-- LSTM -->
+            <section>
+                <h3>LSTM - 长短期记忆网络</h3>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>解决的痛点</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>传统 RNN 的长期依赖问题</li>
+                            <li>梯度消失</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>三个门控</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>遗忘门：决定丢弃什么</li>
+                            <li>输入门：决定存储什么</li>
+                            <li>输出门：决定输出什么</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+class LSTMClassifier(nn.Module):
+    def __init__(self, vocab_size, embed_size, hidden_size, num_classes):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_size)
+
+        self.lstm = nn.LSTM(
+            input_size=embed_size,
+            hidden_size=hidden_size,
+            num_layers=2,
+            batch_first=True,
+            dropout=0.3,
+            bidirectional=True  # 双向 LSTM
+        )
+
+        self.fc = nn.Linear(hidden_size * 2, num_classes)  # 双向 ×2
+
+    def forward(self, x):
+        embedded = self.embedding(x)
+        lstm_out, (hn, cn) = self.lstm(embedded)
+        # 拼接双向最后状态
+        hidden = torch.cat((hn[-2,:,:], hn[-1,:,:]), dim=1)
+        return self.fc(hidden)
+                </code></pre>
+            </section>
+
+            <!-- Transformer -->
+            <section>
+                <h2>1.3.4 Transformer 架构</h2>
+                <div class="highlight-box">
+                    <p><strong>核心创新</strong>：完全基于注意力机制，无需递归或卷积</p>
+                </div>
+            </section>
+
+            <!-- Self-Attention -->
+            <section>
+                <h3>Self-Attention 机制</h3>
+                <div class="formula">
+                    $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>Q (Query)</h4>
+                        <p style="font-size: 0.75em;">当前词的查询向量</p>
+                    </div>
+                    <div class="concept-card">
+                        <h4>K (Key)</h4>
+                        <p style="font-size: 0.75em;">所有词的键向量</p>
+                    </div>
+                </div>
+                <div class="concept-card">
+                    <h4>V (Value)</h4>
+                    <p style="font-size: 0.75em;">所有词的值向量，加权求和得到输出</p>
+                </div>
+            </section>
+
+            <!-- Multi-Head Attention -->
+            <section>
+                <h3>Multi-Head Attention 实现</h3>
+                <pre><code class="python" data-trim data-noescape>
+class MultiHeadAttention(nn.Module):
+    def __init__(self, embed_size, num_heads):
+        super().__init__()
+        self.embed_size = embed_size
+        self.num_heads = num_heads
+        self.head_dim = embed_size // num_heads
+
+        self.q_linear = nn.Linear(embed_size, embed_size)
+        self.k_linear = nn.Linear(embed_size, embed_size)
+        self.v_linear = nn.Linear(embed_size, embed_size)
+        self.out_linear = nn.Linear(embed_size, embed_size)
+
+    def forward(self, query, key, value, mask=None):
+        batch_size = query.size(0)
+
+        # 线性变换并分头
+        Q = self.q_linear(query).view(batch_size, -1, self.num_heads, self.head_dim).transpose(1, 2)
+        K = self.k_linear(key).view(batch_size, -1, self.num_heads, self.head_dim).transpose(1, 2)
+        V = self.v_linear(value).view(batch_size, -1, self.num_heads, self.head_dim).transpose(1, 2)
+
+        # Attention 分数
+        scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(self.head_dim)
+
+        if mask is not None:
+            scores = scores.masked_fill(mask == 0, -1e9)
+
+        attn = torch.softmax(scores, dim=-1)
+        context = torch.matmul(attn, V)
+
+        # 合并多头
+        context = context.transpose(1, 2).contiguous().view(batch_size, -1, self.embed_size)
+        return self.out_linear(context)
+                </code></pre>
+            </section>
+
+            <!-- Transformer Encoder -->
+            <section>
+                <h3>Transformer Encoder Layer</h3>
+                <div class="architecture-diagram">
+                    <pre>
+┌─────────────────────────────────┐
+│         Output                  │
+│           ↑                     │
+│    Add & Norm                   │
+│           ↑                     │
+│      Feed Forward               │
+│           ↑                     │
+│    Add & Norm                   │
+│           ↑                     │
+│    Multi-Head Attention         │
+│           ↑                     │
+│         Input Q, K, V           │
+└─────────────────────────────────┘
+                    </pre>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+class TransformerEncoderLayer(nn.Module):
+    def __init__(self, embed_size, num_heads, ff_hidden, dropout=0.1):
+        super().__init__()
+        self.attention = MultiHeadAttention(embed_size, num_heads)
+        self.feed_forward = FeedForward(embed_size, ff_hidden, dropout)
+        self.norm1 = nn.LayerNorm(embed_size)
+        self.norm2 = nn.LayerNorm(embed_size)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x, mask=None):
+        # Pre-Norm 架构（更稳定）
+        attn_output = self.attention(x, x, x, mask)
+        x = self.norm1(x + self.dropout(attn_output))
+
+        ff_output = self.feed_forward(x)
+        x = self.norm2(x + self.dropout(ff_output))
+        return x
+                </code></pre>
+            </section>
+
+            <!-- 训练技巧 -->
+            <section>
+                <h2>🛠️ 训练技巧与最佳实践</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>权重初始化</h4>
+                        <pre style="font-size: 0.65em;"><code>nn.init.xavier_uniform_
+nn.init.kaiming_normal_</code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>学习率调度器</h4>
+                        <pre style="font-size: 0.65em;"><code>CosineAnnealingLR
+ReduceLROnPlateau</code></pre>
+                    </div>
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>梯度裁剪</h4>
+                        <pre style="font-size: 0.65em;"><code>clip_grad_norm_(
+    model.parameters(),
+    max_norm=1.0)</code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>混合精度训练</h4>
+                        <pre style="font-size: 0.65em;"><code>from torch.cuda.amp
+import autocast, GradScaler</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 常见误区 -->
+            <section>
+                <h2>⚠️ 常见误区</h2>
+                <div class="warning-box">
+                    <table class="comparison-table" style="font-size: 0.75em;">
+                        <thead>
+                            <tr>
+                                <th>误区</th>
+                                <th>正确理解</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>"网络越深越好"</td>
+                                <td>过深导致梯度消失/过拟合，ResNet 用残差连接解决</td>
+                            </tr>
+                            <tr>
+                                <td>"ReLU 一定比 Sigmoid 好"</td>
+                                <td>输出层用 Sigmoid/Softmax，RNN 用 Tanh</td>
+                            </tr>
+                            <tr>
+                                <td>"Transformer 总是优于 CNN"</td>
+                                <td>小数据集 CNN 可能更好，且推理更快</td>
+                            </tr>
+                            <tr>
+                                <td>"Batch Size 越大越好"</td>
+                                <td>太大导致泛化差，常用 32-256</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 练习题 -->
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：反向传播推导</h4>
+                    <p style="font-size: 0.8em;">推导两层 MLP 的梯度计算公式</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 2：CNN 参数计算</h4>
+                    <p style="font-size: 0.8em;">输入 224×224×3，经过 Conv(64, 3×3, padding=1) 后输出尺寸？参数量？</p>
+                    <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">答案：224×224×64，参数 = (3×3×3+1)×64 = 1,792</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 3：Attention 计算</h4>
+                    <p style="font-size: 0.8em;">解释为什么需要除以 $\sqrt{d_k}$？</p>
+                </div>
+            </section>
+
+            <!-- 延伸阅读 -->
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>📘 《Deep Learning》- Ian Goodfellow (第 6-10 章)</li>
+                    <li>📘 《Dive into Deep Learning》- 交互式深度学习教材</li>
+                    <li>🌐 <a href="https://pytorch.org/tutorials/" style="color: #3b82f6;">PyTorch 官方教程</a></li>
+                    <li>🌐 <a href="https://jalammar.github.io/illustrated-transformer/" style="color: #3b82f6;">The Illustrated Transformer</a></li>
+                </ul>
+            </section>
+
+            <!-- 结束页 -->
+            <section>
+                <h2>🎉 完成本节学习！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>1.4 AI 安全与伦理</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="1-4-ai-ethics.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b; margin-right: 1em;">← 返回导航</a>
+                        <a href="../../docs/chapter-1/1-3-deep-learning.md" style="color: #64748b;">查看文档</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="1-2-ml-algorithms.html">← 机器学习</a> |
+        <a href="1-4-ai-ethics.html">AI 伦理 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            showSlideNumber: 'all',
+            controls: true,
+            progress: true,
+            center: true,
+            transition: 'slide',
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+    </script>
+</body>
+</html>

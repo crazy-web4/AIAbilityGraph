@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.3 参数高效微调 (PEFT) - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .warning-box { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .formula { font-size: 1.2em; text-align: center; padding: 0.5em; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 0.5em 0; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🎯 参数高效微调 (PEFT)</h1>
+                <h4>AI 能力图谱 · 第 2 章第 3 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>LoRA · QLoRA · Adapter · Prompt Tuning</p>
+                    <p style="margin-top: 1em;">用极少量参数实现高效微调</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 PEFT 的必要性与核心思想</li>
+                        <li>✅ 掌握 LoRA、QLoRA 的原理与实现</li>
+                        <li>✅ 运用 Prompt Tuning、Prefix Tuning 技术</li>
+                        <li>✅ 根据资源约束选择合适的微调方案</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>为什么需要 PEFT？</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>全参数微调的问题</h4>
+                        <table class="comparison-table" style="font-size: 0.65em;">
+                            <tr><th>模型</th><th>显存需求</th></tr>
+                            <tr><td>7B</td><td>~80GB</td></tr>
+                            <tr><td>13B</td><td>~156GB</td></tr>
+                            <tr><td>70B</td><td>~840GB</td></tr>
+                        </table>
+                    </div>
+                    <div class="concept-card">
+                        <h4>PEFT 优势</h4>
+                        <table class="comparison-table" style="font-size: 0.65em;">
+                            <tr><th>方法</th><th>可训练参数</th><th>显存</th></tr>
+                            <tr><td>LoRA</td><td>0.1%</td><td>16GB</td></tr>
+                            <tr><td>QLoRA</td><td>0.1%</td><td>12GB</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>LoRA 核心原理</h2>
+                <div class="formula">
+                    $$W' = W + \Delta W = W + BA$$
+                    <p style="font-size: 0.7em; margin-top: 0.5em;">$B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times k}$, $r \ll d,k$</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+class LoRALinear(nn.Module):
+    """LoRA 线性层"""
+    def __init__(self, in_features, out_features,
+                 rank=8, alpha=16):
+        super().__init__()
+        self.weight = nn.Parameter(
+            torch.randn(out_features, in_features))
+        self.rank = rank
+        self.scaling = alpha / rank
+
+        # A 高斯初始化，B 零初始化
+        self.lora_A = nn.Parameter(
+            torch.randn(rank, in_features))
+        self.lora_B = nn.Parameter(
+            torch.zeros(out_features, rank))
+
+    def forward(self, x):
+        original = F.linear(x, self.weight)
+        lora = (x @ self.lora_A.T @ self.lora_B.T
+                * self.scaling)
+        return original + lora
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>LoRA 实战应用</h2>
+                <pre><code class="python" data-trim data-noescape>
+from peft import LoraConfig, get_peft_model
+from transformers import AutoModelForCausalLM
+
+# 加载基础模型
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b-hf"
+)
+
+# LoRA 配置
+lora_config = LoraConfig(
+    r=8,                    # LoRA 秩
+    lora_alpha=16,          # 缩放系数
+    target_modules=[        # 要应用的层
+        "q_proj", "k_proj",
+        "v_proj", "o_proj"
+    ],
+    lora_dropout=0.1,
+    bias="none",
+    task_type="CAUSAL_LM"
+)
+
+# 应用 LoRA
+peft_model = get_peft_model(model, lora_config)
+print(f"可训练参数：{peft_model.num_parameters(only_trainable=True)/1e6:.2f}M")
+# 输出：约 8.4M (原模型的 0.12%)
+                </code></pre>
+                <div class="highlight-box">
+                    <p><strong>关键优势</strong>：可训练参数减少 1000 倍，显存需求降低 5-8 倍</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>QLoRA - 量化增强的 LoRA</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>核心创新</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>4-bit NormalFloat 量化</li>
+                            <li>页感知优化</li>
+                            <li>双重量化</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>优势</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>7B 模型仅需 12GB 显存</li>
+                            <li>性能接近全微调</li>
+                            <li>可微调 70B 模型</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+from transformers import BitsAndBytesConfig
+import torch
+
+# 4-bit 量化配置
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_use_double_quant=True  # 双重量化
+)
+
+# 加载量化模型
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b-hf",
+    quantization_config=bnb_config,
+    device_map="auto"
+)
+
+# 应用 LoRA
+peft_model = prepare_model_for_kbit_training(model)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>PEFT 方法对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>可训练参数</th>
+                            <th>显存 (7B)</th>
+                            <th>性能</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>全微调</strong></td>
+                            <td>100%</td>
+                            <td>80GB+</td>
+                            <td>基准</td>
+                            <td>资源充足</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LoRA</strong></td>
+                            <td>~0.1%</td>
+                            <td>16GB</td>
+                            <td>接近全微调</td>
+                            <td>默认选择</td>
+                        </tr>
+                        <tr>
+                            <td><strong>QLoRA</strong></td>
+                            <td>~0.1%</td>
+                            <td>12GB</td>
+                            <td>≈LoRA</td>
+                            <td>资源受限</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Prompt Tuning</strong></td>
+                            <td>~0.01%</td>
+                            <td>10GB</td>
+                            <td>稍低</td>
+                            <td>多任务学习</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：LoRA 秩选择</h4>
+                    <p style="font-size: 0.8em;">当 rank 从 8 增加到 32 时，参数量和性能如何变化？</p>
+                    <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">答案：参数增加 4 倍，性能提升边际递减</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 2：QLoRA 量化</h4>
+                    <p style="font-size: 0.8em;">4-bit 量化相比 16-bit 减少多少显存？</p>
+                    <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">答案：约 75% (16/4=4 倍)</p>
+                </div>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">用 LoRA 微调 Llama-2-7B 适应医疗问答任务</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/2106.09685" style="color: #3b82f6;">LoRA: Low-Rank Adaptation of LLMs</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2305.14314" style="color: #3b82f6;">QLoRA: Efficient Finetuning of Quantized LLMs</a></li>
+                    <li>🌐 <a href="https://github.com/huggingface/peft" style="color: #3b82f6;">PEFT 官方库</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节学习！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>2.4 多模态大模型技术</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="2-4-multimodal.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="2-2-pretraining.html">← 预训练</a> |
+        <a href="2-4-multimodal.html">多模态 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+    </script>
+</body>
+</html>

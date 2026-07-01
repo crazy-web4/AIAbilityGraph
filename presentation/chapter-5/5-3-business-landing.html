@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.3 业务场景落地 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>💼 业务场景落地</h1>
+                <h4>AI 能力图谱 · 第 5 章第 3 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 识别高价值 AI 应用场景</li>
+                        <li>✅ 理解 AI 项目落地流程</li>
+                        <li>✅ 掌握 ROI 评估方法</li>
+                        <li>✅ 规避常见落地陷阱</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>AI 落地场景评估框架</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>维度</th>
+                            <th>高优先级</th>
+                            <th>低优先级</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>业务价值</strong></td>
+                            <td>高 revenue 影响</td>
+                            <td>边缘场景</td>
+                        </tr>
+                        <tr>
+                            <td><strong>数据可用性</strong></td>
+                            <td>数据充足高质量</td>
+                            <td>数据稀缺/低质</td>
+                        </tr>
+                        <tr>
+                            <td><strong>技术成熟度</strong></td>
+                            <td>有成熟方案</td>
+                            <td>需前沿研究</td>
+                        </tr>
+                        <tr>
+                            <td><strong>实施难度</strong></td>
+                            <td>低风险易集成</td>
+                            <td>高风险复杂集成</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>典型业务场景</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>客户服务</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>智能客服机器人</li>
+                            <li>工单自动分类</li>
+                            <li>情感分析</li>
+                            <li>ROI：人力成本↓50%+</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>内容生成</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>营销文案生成</li>
+                            <li>报告自动生成</li>
+                            <li>多语言翻译</li>
+                            <li>ROI：效率提升 10x+</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="two-column" style="margin-top:0.8em;">
+                    <div class="concept-card">
+                        <h4>决策支持</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>风险评估</li>
+                            <li>销量预测</li>
+                            <li>异常检测</li>
+                            <li>ROI：决策质量↑</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>流程自动化</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>文档信息提取</li>
+                            <li>合同审核</li>
+                            <li>数据录入自动化</li>
+                            <li>ROI：错误率↓90%+</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>落地流程</h2>
+                <div class="architecture-diagram" style="background:rgba(255,255,255,0.03); padding:1em; border-radius:8px; font-size:0.65em;">
+                    <pre>
+1. 场景识别 → 2. 可行性评估 → 3. PoC 验证 → 4. MVP 开发 → 5. 规模推广
+     │              │              │            │            │
+     ▼              ▼              ▼            ▼            ▼
+  价值评估      数据审计      技术验证     用户测试     全量部署
+                    </pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>ROI 计算方法</h2>
+                <pre><code class="python" data-trim data-noescape>
+# ROI 计算公式
+def calculate_roi(benefits, costs):
+    """
+    benefits: 年度收益
+    costs: 总成本 (开发 + 运维)
+    """
+    roi = (benefits - costs) / costs * 100
+    payback_period = costs / (benefits / 12)  # 月
+
+    return {
+        "roi_percent": roi,
+        "payback_months": payback_period
+    }
+
+# 示例：客服机器人
+benefits = (
+    500000 +      # 人力成本节省
+    200000 +      # 效率提升
+    100000        # 客户满意度提升
+)
+costs = (
+    300000 +      # 开发成本
+    100000        # 年度运维
+)
+
+roi = calculate_roi(benefits, costs)
+# ROI: 125%, Payback: 9.6 个月
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>常见陷阱与规避</h2>
+                <div class="warning-box">
+                    <table class="comparison-table" style="font-size:0.75em;">
+                        <thead>
+                            <tr>
+                                <th>陷阱</th>
+                                <th>规避方法</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>技术驱动而非业务驱动</td>
+                                <td>从业务痛点出发，反向选择技术</td>
+                            </tr>
+                            <tr>
+                                <td>忽视数据质量</td>
+                                <td>早期进行数据审计和清洗</td>
+                            </tr>
+                            <tr>
+                                <td>期望过高</td>
+                                <td>设定合理的成功指标</td>
+                            </tr>
+                            <tr>
+                                <td>缺乏持续运营</td>
+                                <td>建立模型监控和迭代机制</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>案例分析</h4>
+                    <p style="font-size: 0.8em;">为你所在的公司/组织设计一个 AI 落地场景，包括 ROI 分析</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>📘 《AI Superpowers》- 李开复</li>
+                    <li>📘 《Power and Prediction》</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 第 5 章完成！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一章：<strong>第 6 章 算法工程能力</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="../index.html" style="color: #3b82f6;">返回首页 →</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="5-2-product-design.html">← 产品设计</a> |
+        <a href="../chapter-6/6-1-python-advanced.html">第 6 章 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.1 分布式训练技术 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .warning-box { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .formula { font-size: 1.2em; text-align: center; padding: 0.5em; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 0.5em 0; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+        .architecture-diagram { background: rgba(255,255,255,0.03); padding: 1em; border-radius: 8px; font-family: monospace; font-size: 0.6em; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🖥️ 分布式训练技术</h1>
+                <h4>AI 能力图谱 · 第 3 章第 1 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>Data Parallel · Model Parallel · DeepSpeed · FSDP</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解数据并行与模型并行的核心思想</li>
+                        <li>✅ 掌握 3D 并行策略（Data+Tensor+Pipeline）</li>
+                        <li>✅ 运用 DeepSpeed、FSDP 进行大规模训练</li>
+                        <li>✅ 能够设计分布式训练方案</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>为什么需要分布式训练？</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>单 GPU 显存限制</h4>
+                        <table class="comparison-table" style="font-size: 0.65em;">
+                            <tr><th>模型</th><th>FP16 显存</th><th>单 A100</th></tr>
+                            <tr><td>7B</td><td>14GB</td><td>✅</td></tr>
+                            <tr><td>13B</td><td>26GB</td><td>❌</td></tr>
+                            <tr><td>70B</td><td>140GB</td><td>❌</td></tr>
+                            <tr><td>175B</td><td>350GB</td><td>❌</td></tr>
+                        </table>
+                    </div>
+                    <div class="concept-card">
+                        <h4>训练时间需求</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>7B 模型：单卡 ~数周</li>
+                            <li>70B 模型：单卡 ~数年</li>
+                            <li>分布式：缩短到数天</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>数据并行 (Data Parallelism)</h2>
+                <div class="highlight-box">
+                    <p><strong>核心思想</strong>：模型复制到多个 GPU，每个 GPU 处理不同数据批次</p>
+                </div>
+                <div class="architecture-diagram">
+                    <pre>
+GPU 0: Model → Grad ← Data Batch 0
+GPU 1: Model → Grad ← Data Batch 1
+GPU 2: Model → Grad ← Data Batch 2
+GPU 3: Model → Grad ← Data Batch 3
+              ↓
+         All-Reduce 梯度聚合
+              ↓
+        同步更新模型参数
+                    </pre>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+# PyTorch DDP 示例
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
+
+def setup_ddp():
+    dist.init_process_group("nccl")
+    local_rank = int(os.environ["LOCAL_RANK"])
+    torch.cuda.set_device(local_rank)
+
+model = MyModel().cuda(local_rank)
+ddp_model = DDP(model, device_ids=[local_rank])
+
+for batch in dataloader:
+    loss = ddp_model(batch)
+    loss.backward()
+# 自动 All-Reduce 梯度
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>模型并行 (Model Parallelism)</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>张量并行 (Tensor Parallel)</h4>
+                        <pre style="font-size: 0.6em;"><code>将单个矩阵运算拆分到多个 GPU
+
+MLP 层：W · x
+  GPU0: W₀ · x
+  GPU1: W₁ · x
+  结果拼接 → 输出</code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>流水线并行 (Pipeline Parallel)</h4>
+                        <pre style="font-size: 0.6em;"><code>按层拆分模型到多个 GPU
+
+GPU0: Layer 1-8
+GPU1: Layer 9-16
+GPU2: Layer 17-24
+GPU3: Layer 25-32</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>3D 并行策略</h2>
+                <div class="architecture-diagram">
+                    <pre>
+┌─────────────────────────────────────────────┐
+│           3D 并行 = Data × Tensor × Pipeline │
+├─────────────────────────────────────────────┤
+│  Data Parallel: 批次拆分到多节点           │
+│  Tensor Parallel: 层内矩阵运算拆分         │
+│  Pipeline Parallel: 层间拆分               │
+└─────────────────────────────────────────────┘
+
+典型配置 (训练 175B 模型):
+  · Data Parallel: 32 路
+  · Tensor Parallel: 4 路
+  · Pipeline Parallel: 8 路
+  总 GPU 数 = 32 × 4 × 8 = 1024 GPU
+                    </pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>DeepSpeed ZeRO 优化</h2>
+                <div class="highlight-box">
+                    <p><strong>ZeRO</strong>: Zero Redundancy Optimizer，消除冗余内存占用</p>
+                </div>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>ZeRO 级别</th>
+                            <th>优化内容</th>
+                            <th>显存节省</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ZeRO-1</strong></td>
+                            <td>优化器状态分片</td>
+                            <td>8 倍 (Adam 状态)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ZeRO-2</strong></td>
+                            <td>+ 梯度分片</td>
+                            <td>再省 2 倍</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ZeRO-3</strong></td>
+                            <td>+ 参数分片</td>
+                            <td>再省 2 倍</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>DeepSpeed 配置示例</h2>
+                <pre><code class="json" data-trim data-noescape>
+{
+  "train_batch_size": 256,
+  "fp16": { "enabled": true },
+
+  "zero_optimization": {
+    "stage": 3,
+    "offload_optimizer": {
+      "device": "cpu",
+      "pin_memory": true
+    },
+    "offload_param": {
+      "device": "cpu",
+      "pin_memory": true
+    },
+    "overlap_comm": true,
+    "contiguous_gradients": true,
+    "sub_group_size": 1e9
+  },
+
+  "gradient_accumulation_steps": 8,
+  "gradient_clipping": 1.0,
+  "steps_per_print": 10
+}
+                </code></pre>
+                <div class="highlight-box">
+                    <p><strong>CPU Offload</strong>：将优化器状态、参数卸载到 CPU，进一步节省显存</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>FSDP - Fully Sharded Data Parallel</h2>
+                <pre><code class="python" data-trim data-noescape>
+from torch.distributed.fsdp import (
+    FullyShardedDataParallel as FSDP,
+    FullStateDictConfig,
+    StateDictType
+)
+from torch.distributed.fsdp.wrap import (
+    size_based_auto_wrap_policy
+)
+
+# 创建 FSDP 模型
+fsdp_model = FSDP(
+    model,
+    auto_wrap_policy=size_based_auto_wrap_policy,
+    mixed_precision={
+        "param_dtype": torch.float16,
+        "reduce_dtype": torch.float16,
+    },
+    cpu_offload=CPUOffload(offload_params=True)
+)
+
+# 保存完整 checkpoint
+save_policy = FullStateDictConfig(offload_to_cpu=True)
+with FSDP.state_dict_type(fsdp_model, StateDictType.FULL_STATE_DICT, save_policy):
+    checkpoint = fsdp_model.state_dict()
+    torch.save(checkpoint, "model.pt")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：显存估算</h4>
+                    <p style="font-size: 0.8em;">训练 65B 模型，用 ZeRO-3+CPU Offload，每卡需要多少显存？</p>
+                    <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">答案：约 16-24GB (取决于配置)</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 2：并行策略选择</h4>
+                    <p style="font-size: 0.8em;">8 张 A100 训练 13B 模型，如何配置 3D 并行？</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/1910.02054" style="color: #3b82f6;">DeepSpeed: System Optimization</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2106.06968" style="color: #3b82f6;">ZeRO: Memory Optimization</a></li>
+                    <li>🌐 <a href="https://pytorch.org/fsdp" style="color: #3b82f6;">PyTorch FSDP 文档</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>3.2 模型压缩与量化</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="3-2-compression.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="3-2-compression.html">压缩与量化 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+    </script>
+</body>
+</html>

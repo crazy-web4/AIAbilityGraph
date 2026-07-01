@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.3 测试与验证 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>✅ 测试与验证</h1>
+                <h4>AI 能力图谱 · 第 6 章第 3 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 AI 系统测试的特殊性</li>
+                        <li>✅ 掌握单元测试与集成测试方法</li>
+                        <li>✅ 学会模型验证与回归测试</li>
+                        <li>✅ 构建 CI/CD 测试流程</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>AI 测试挑战</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>传统软件测试</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>确定性输出</li>
+                            <li>明确的预期结果</li>
+                            <li>边界条件清晰</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>AI 系统测试</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>概率性输出</li>
+                            <li>模糊的正确性</li>
+                            <li>边界情况复杂</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>测试层次</h2>
+                <div class="architecture-diagram" style="background:rgba(255,255,255,0.03); padding:1em; border-radius:8px; font-size:0.65em;">
+                    <pre>
+┌─────────────────────────────────────────┐
+│           测试金字塔                    │
+│                                         │
+│              /‾‾‾\                      │
+│             / E2E \                     │
+│            /───────\                    │
+│           /  集成    \                   │
+│          /───────────\                  │
+│         /   单元测试    \                 │
+│        /───────────────\                 │
+│       /     数据测试      \                │
+│      /───────────────────\                │
+└─────────────────────────────────────────┘
+                    </pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>单元测试示例</h2>
+                <pre><code class="python" data-trim data-noescape>
+# test_model.py
+import pytest
+import torch
+from model import MyModel
+
+def test_model_output_shape():
+    model = MyModel()
+    x = torch.randn(4, 10, 512)  # batch=4, seq=10, dim=512
+    output = model(x)
+
+    assert output.shape == (4, 10, 512)
+    assert not torch.isnan(output).any()
+
+def test_model_deterministic():
+    model = MyModel()
+    model.eval()
+
+    x = torch.randn(2, 5, 512)
+
+    with torch.no_grad():
+        out1 = model(x)
+        out2 = model(x)
+
+    assert torch.allclose(out1, out2)
+
+# 运行：pytest test_model.py -v
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>数据验证测试</h2>
+                <pre><code class="python" data-trim data-noescape>
+# test_data.py
+import pandas as pd
+
+def test_data_quality(data_df):
+    """数据质量测试"""
+    # 无空值
+    assert data_df.isnull().sum().sum() == 0
+
+    # 数值范围合理
+    assert (data_df['age'] >= 0).all()
+    assert (data_df['age'] <= 120).all()
+
+    # 类别值在预期内
+    expected_categories = ['A', 'B', 'C']
+    assert set(data_df['category'].unique()).issubset(expected_categories)
+
+# 测试数据集加载
+def test_dataloader():
+    loader = get_dataloader(batch_size=32)
+    batch = next(iter(loader))
+
+    assert len(batch) == 2  # (inputs, labels)
+    assert batch[0].shape[0] == 32  # batch size
+    assert not torch.isnan(batch[0]).any()
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>模型回归测试</h2>
+                <pre><code class="python" data-trim data-noescape>
+# test_regression.py
+import numpy as np
+
+# 记录基线性能
+BASELINE_ACCURACY = 0.95
+BASELINE_LATENCY = 50  # ms
+
+def test_accuracy_regression(model, test_data):
+    """准确率回归测试"""
+    accuracy = evaluate(model, test_data)
+
+    # 允许 2% 波动
+    assert accuracy >= BASELINE_ACCURACY * 0.98, (
+        f"准确率下降过多：{accuracy}"
+    )
+
+def test_latency_regression(model, input_data):
+    """延迟回归测试"""
+    import time
+
+    start = time.time()
+    _ = model(input_data)
+    latency = (time.time() - start) * 1000
+
+    # 允许 20% 波动
+    assert latency <= BASELINE_LATENCY * 1.2, (
+        f"延迟增加过多：{latency}ms"
+    )
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">为一个文本分类模型编写完整的测试套件</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>📘 《Testing Python Applications》</li>
+                    <li>🌐 <a href="https://pytest.org/" style="color: #3b82f6;">Pytest 文档</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>6.4 AI 工程化与部署</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="6-4-deployment.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="6-2-engineering.html">← 算法工程化</a> |
+        <a href="6-4-deployment.html">部署 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

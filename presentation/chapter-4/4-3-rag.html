@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.3 RAG 应用开发 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+        .architecture-diagram { background: rgba(255,255,255,0.03); padding: 1em; border-radius: 8px; font-family: monospace; font-size: 0.6em; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>📚 RAG 应用开发</h1>
+                <h4>AI 能力图谱 · 第 4 章第 3 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 RAG 的核心架构与工作原理</li>
+                        <li>✅ 掌握向量数据库的选择与使用</li>
+                        <li>✅ 实现文档检索与生成 pipeline</li>
+                        <li>✅ 优化检索质量和生成效果</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>RAG 架构</h2>
+                <div class="architecture-diagram">
+                    <pre>
+┌─────────────────────────────────────────────┐
+│                    RAG Pipeline             │
+├─────────────────────────────────────────────┤
+│  用户问题 → 检索 → 相关文档 → 增强提示 → LLM → 回答 │
+│               │                           │       │
+│               ▼                           │       │
+│         向量数据库                        │       │
+│         (Chroma/FAISS)                    │       │
+│                                           │       │
+│  文档 → 切片 → Embedding → 存储           │       │
+└─────────────────────────────────────────────┘
+                    </pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>向量数据库对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>数据库</th>
+                            <th>类型</th>
+                            <th>规模</th>
+                            <th>特点</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Chroma</strong></td>
+                            <td>嵌入式</td>
+                            <td>小到中</td>
+                            <td>简单易用，适合开发</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FAISS</strong></td>
+                            <td>库</td>
+                            <td>大</td>
+                            <td>Facebook，速度快</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Milvus</strong></td>
+                            <td>服务</td>
+                            <td>超大</td>
+                            <td>生产级，支持分布式</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pinecone</strong></td>
+                            <td>云服务</td>
+                            <td>大</td>
+                            <td>全托管，易用</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Chroma 实战</h2>
+                <pre><code class="python" data-trim data-noescape>
+import chromadb
+from chromadb.config import Settings
+
+# 创建客户端
+client = chromadb.Client(Settings(
+    chroma_db_impl="duckdb+parquet",
+    persist_directory="./chroma_data"
+))
+
+# 创建集合
+collection = client.create_collection(
+    name="documents",
+    metadata={"hnsw:space": "cosine"}
+)
+
+# 添加文档
+collection.add(
+    documents=["文档内容 1", "文档内容 2"],
+    ids=["doc1", "doc2"],
+    metadatas=[{"source": "file1.txt"}, {"source": "file2.txt"}]
+)
+
+# 查询
+results = collection.query(
+    query_texts=["用户问题"],
+    n_results=3
+)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>完整 RAG Pipeline</h2>
+                <pre><code class="python" data-trim data-noescape>
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import RetrievalQA
+
+# 1. 文档切片
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=50
+)
+docs = splitter.split_documents(documents)
+
+# 2. 创建向量存储
+embeddings = OpenAIEmbeddings()
+vectorstore = Chroma.from_documents(
+    docs,
+    embeddings,
+    persist_directory="./chroma_db"
+)
+
+# 3. 创建 QA 链
+llm = ChatOpenAI(model="gpt-4", temperature=0.7)
+qa_chain = RetrievalQA.from_chain_type(
+    llm,
+    retriever=vectorstore.as_retriever(
+        search_type="similarity_score_threshold",
+        search_kwargs={"score_threshold": 0.7}
+    )
+)
+
+# 4. 使用
+response = qa_chain("你的问题")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>检索优化技巧</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>混合检索</h4>
+                        <pre style="font-size: 0.65em;"><code># 语义 + 关键词
+results = vectorstore.hybrid_search(
+    query="问题",
+    k=5,
+    weights=[0.7, 0.3]  # 向量/文本权重
+)</code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>重排序</h4>
+                        <pre style="font-size: 0.65em;"><code>from langchain.retrievers import ContextualCompressionRetriever
+
+compressor = LLMChainExtractor.from_llm(llm)
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor,
+    base_retriever=retriever
+)</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">用 LangChain 构建一个基于文档的问答系统</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/2005.11401" style="color: #3b82f6;">RAG 原论文</a></li>
+                    <li>🌐 <a href="https://python.langchain.com/" style="color: #3b82f6;">LangChain 文档</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>4.4 Agent 应用开发</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="4-4-agent.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="4-2-prompt-engineering.html">← 提示词</a> |
+        <a href="4-4-agent.html">Agent →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

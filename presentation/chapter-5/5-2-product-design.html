@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.2 AI 产品设计 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🎨 AI 产品设计</h1>
+                <h4>AI 能力图谱 · 第 5 章第 2 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 AI 产品的 UX 设计原则</li>
+                        <li>✅ 掌握 AI 功能的交互设计模式</li>
+                        <li>✅ 学会处理不确定性设计</li>
+                        <li>✅ 设计人机协同流程</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>AI 产品设计挑战</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>不确定性</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>输出不是 100% 准确</li>
+                            <li>需要设计容错机制</li>
+                            <li>用户期望管理</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>可解释性</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>为什么给出这个结果？</li>
+                            <li>如何建立用户信任？</li>
+                            <li>透明度设计</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="two-column" style="margin-top:0.8em;">
+                    <div class="concept-card">
+                        <h4>反馈循环</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>用户纠正机制</li>
+                            <li>持续学习设计</li>
+                            <li>数据收集合规</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>边界情况</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>AI 无法处理时怎么办？</li>
+                            <li>人工接管流程</li>
+                            <li>降级策略</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>AI 交互设计模式</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>模式</th>
+                            <th>描述</th>
+                            <th>示例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>建议式</strong></td>
+                            <td>AI 提供建议，用户决定</td>
+                            <td>Gmail 智能回复</td>
+                        </tr>
+                        <tr>
+                            <td><strong>代理式</strong></td>
+                            <td>AI 自主执行，用户监督</td>
+                            <td>自动分类邮件</td>
+                        </tr>
+                        <tr>
+                            <td><strong>协作式</strong></td>
+                            <td>人机共同完成任务</td>
+                            <td>代码补全工具</td>
+                        </tr>
+                        <tr>
+                            <td><strong>增强式</strong></td>
+                            <td>AI 扩展用户能力</td>
+                            <td>实时翻译</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>设计原则</h2>
+                <div class="highlight-box">
+                    <p><strong>1. 设定正确期望</strong></p>
+                    <ul style="font-size: 0.8em;">
+                        <li>明确告知 AI 能力边界</li>
+                        <li>展示置信度</li>
+                        <li>提供"不确定"反馈</li>
+                    </ul>
+                </div>
+                <div class="highlight-box" style="margin-top:0.5em;">
+                    <p><strong>2. 提供控制感</strong></p>
+                    <ul style="font-size: 0.8em;">
+                        <li>允许用户撤销/修改</li>
+                        <li>透明展示 AI 决策过程</li>
+                        <li>提供人工覆盖选项</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>设计题</h4>
+                    <p style="font-size: 0.8em;">为一个 AI 写作助手设计用户界面和交互流程</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>📘 《Designing AI Products》</li>
+                    <li>🌐 <a href="https://www.nngroup.com/articles/human-ai-guidelines/" style="color: #3b82f6;">NNGroup AI Design Guidelines</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>5.3 业务场景落地</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="5-3-business-landing.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="5-1-requirements.html">← 需求分析</a> |
+        <a href="5-3-business-landing.html">业务落地 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

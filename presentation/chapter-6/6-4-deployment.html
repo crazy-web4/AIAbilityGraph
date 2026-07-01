@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.4 AI 工程化与部署 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🚀 AI 工程化与部署</h1>
+                <h4>AI 能力图谱 · 第 6 章第 4 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 掌握模型部署的主要方式</li>
+                        <li>✅ 理解容器化与编排</li>
+                        <li>✅ 学会性能监控与优化</li>
+                        <li>✅ 构建生产级 AI 系统</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>部署方式对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>方式</th>
+                            <th>延迟</th>
+                            <th>成本</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>云端 API</strong></td>
+                            <td>中</td>
+                            <td>按量付费</td>
+                            <td>快速上线</td>
+                        </tr>
+                        <tr>
+                            <td><strong>边缘部署</strong></td>
+                            <td>低</td>
+                            <td>硬件成本</td>
+                            <td>实时需求</td>
+                        </tr>
+                        <tr>
+                            <td><strong>本地部署</strong></td>
+                            <td>低</td>
+                            <td>高 (硬件)</td>
+                            <td>数据敏感</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Docker 容器化</h2>
+                <pre><code class="dockerfile" data-trim data-noescape>
+# Dockerfile
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# 安装依赖
+RUN pip install torch torchvision \
+    transformers fastapi uvicorn
+
+# 复制代码
+COPY . .
+
+# 暴露端口
+EXPOSE 8000
+
+# 启动命令
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0"]
+                </code></pre>
+                <pre><code class="bash" data-trim data-noescape>
+# 构建镜像
+docker build -t ai-service .
+
+# 运行容器
+docker run -p 8000:8000 ai-services
+
+# Docker Compose
+docker-compose up -d
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Kubernetes 部署</h2>
+                <pre><code class="yaml" data-trim data-noescape>
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+    spec:
+      containers:
+      - name: ai-service
+        image: ai-service:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+          limits:
+            memory: 8Gi
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>性能监控</h2>
+                <pre><code class="python" data-trim data-noescape>
+# Prometheus 指标
+from prometheus_client import Counter, Histogram, start_http_server
+
+REQUEST_COUNT = Counter('ai_requests', 'Total requests')
+REQUEST_LATENCY = Histogram('ai_latency', 'Request latency')
+ERROR_COUNT = Counter('ai_errors', 'Total errors')
+
+def predict(input_data):
+    REQUEST_COUNT.inc()
+
+    start = time.time()
+    try:
+        result = model.predict(input_data)
+        REQUEST_LATENCY.observe(time.time() - start)
+        return result
+    except Exception as e:
+        ERROR_COUNT.inc()
+        raise
+
+# 启动指标服务器
+start_http_server(8001)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">为一个文本分类服务编写 Dockerfile 和 Kubernetes 部署配置</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>📘 《Building Machine Learning Powered Applications》</li>
+                    <li>🌐 <a href="https://kubernetes.io/" style="color: #3b82f6;">Kubernetes 文档</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 第 6 章完成！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一章：<strong>第 7 章 AI 资源与成本</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="../index.html" style="color: #3b82f6;">返回首页 →</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="6-3-testing.html">← 测试验证</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.2 模型压缩与量化 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .warning-box { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🗜️ 模型压缩与量化</h1>
+                <h4>AI 能力图谱 · 第 3 章第 2 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>剪枝 · 量化 · 蒸馏 · 低秩分解</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解模型压缩的四种主要方法</li>
+                        <li>✅ 掌握 INT8/INT4 量化技术</li>
+                        <li>✅ 运用知识蒸馏压缩模型</li>
+                        <li>✅ 根据实际情况选择压缩策略</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>模型压缩方法概览</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>压缩率</th>
+                            <th>精度损失</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>剪枝</strong></td>
+                            <td>50-90%</td>
+                            <td>小</td>
+                            <td>去除冗余连接</td>
+                        </tr>
+                        <tr>
+                            <td><strong>量化</strong></td>
+                            <td>50-75%</td>
+                            <td>极小</td>
+                            <td>推理加速首选</td>
+                        </tr>
+                        <tr>
+                            <td><strong>蒸馏</strong></td>
+                            <td>依学生模型</td>
+                            <td>依赖设计</td>
+                            <td>模型迁移</td>
+                        </tr>
+                        <tr>
+                            <td><strong>低秩分解</strong></td>
+                            <td>30-50%</td>
+                            <td>中等</td>
+                            <td>全连接层压缩</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>量化技术详解</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>量化类型</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li><strong>训练后量化 (PTQ)</strong>: 无需重新训练</li>
+                            <li><strong>量化感知训练 (QAT)</strong>: 训练时模拟量化</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>精度等级</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li><strong>FP32</strong>: 100% 精度，32 bit</li>
+                            <li><strong>FP16</strong>: ~100%, 16 bit</li>
+                            <li><strong>INT8</strong>: 99%+, 8 bit</li>
+                            <li><strong>INT4</strong>: 95%+, 4 bit</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+# PyTorch 动态量化
+from torch.quantization import quantize_dynamic
+import torch.nn as nn
+
+# 只量化 Linear 层
+quantized_model = quantize_dynamic(
+    model,
+    {nn.Linear},
+    dtype=torch.qint8
+)
+
+# 保存量化模型
+torch.save(quantized_model.state_dict(), "model_int8.pt")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>INT8 量化实战</h2>
+                <pre><code class="python" data-trim data-noescape>
+from torch.ao.quantization import (
+    QuantStub, DeQuantStub,
+    prepare_qat, convert,
+    QConfig, default_qconfig
+)
+
+class QuantizedModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.quant = QuantStub()
+        self.fc1 = nn.Linear(768, 3072)
+        self.fc2 = nn.Linear(3072, 768)
+        self.dequant = DeQuantStub()
+
+    def forward(self, x):
+        x = self.quant(x)
+        x = self.fc1(x)
+        x = self.fc2(x)
+        return self.dequant(x)
+
+# 量化感知训练
+model = QuantizedModel()
+model.qconfig = QConfig(
+    activation=default_qconfig.activation,
+    weight=default_qconfig.weight
+)
+prepared_model = prepare_qat(model)
+
+# 训练...
+# 转换为量化模型
+quantized_model = convert(prepared_model)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>模型剪枝</h2>
+                <pre><code class="python" data-trim data-noescape>
+import torch.nn.utils.prune as prune
+import torch.nn as nn
+
+model = nn.Linear(10, 10)
+
+# L1 非结构化剪枝
+prune.l1_unstructured(model, name='weight', amount=0.3)
+# 剪掉 30% 权重
+
+# 结构化剪枝（整行/整列）
+prune.ln_structured(
+    model,
+    name='weight',
+    amount=0.5,
+    n=2,  # L2 范数
+    dim=0  # 按行剪枝
+)
+
+# 永久移除剪枝
+prune.remove(model, 'weight')
+                </code></pre>
+                <div class="highlight-box">
+                    <p><strong>结构化剪枝</strong>：可以真正减少推理时间，非结构化剪枝只减少存储</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>知识蒸馏</h2>
+                <div class="highlight-box">
+                    <p><strong>核心思想</strong>：让小模型（学生）学习大模型（教师）的输出分布</p>
+                </div>
+                <div class="formula">
+                    $$\mathcal{L} = \alpha \cdot \text{CE}(y, \hat{y}) + (1-\alpha) \cdot T^2 \cdot \text{KL}(p_{teacher} || p_{student})$$
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+def distillation_loss(student_logits, teacher_logits,
+                      true_labels, temperature=4, alpha=0.7):
+    """知识蒸馏损失"""
+    ce_loss = nn.CrossEntropyLoss()(student_logits, true_labels)
+
+    soft_target = nn.Softmax(dim=1)(teacher_logits / temperature)
+    student_log_prob = nn.LogSoftmax(dim=1)(student_logits / temperature)
+
+    kl_loss = nn.KLDivLoss()(student_log_prob, soft_target)
+
+    # 组合损失
+    loss = alpha * ce_loss + (1 - alpha) * (temperature ** 2) * kl_loss
+    return loss
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>GPTQ - 4-bit 量化</h2>
+                <pre><code class="python" data-trim data-noescape>
+from transformers import AutoModelForCausalLM
+from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+
+# GPTQ 4-bit 量化配置
+quantize_config = BaseQuantizeConfig(
+    bits=4,
+    group_size=128,
+    desc_act=False  # 关闭 desc_act 加速推理
+)
+
+# 加载并量化
+model = AutoGPTQForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b-hf",
+    quantize_config
+)
+
+# 用校准数据量化
+model.quantize(calibration_data, batch_size=1)
+
+# 保存量化模型
+model.save_quantized("llama-2-7b-gptq-4bit")
+                </code></pre>
+                <div class="warning-box">
+                    <p><strong>效果</strong>：7B 模型从 14GB 压缩到 4GB，速度提升 2-3 倍</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>AWQ - 激活感知量化</h2>
+                <div class="highlight-box">
+                    <p><strong>AWQ 原理</strong>：保护重要权重（高激活值）不被量化误差影响</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+from awq import AutoAWQForCausalLM
+
+# AWQ 量化
+quant_config = { "zero_point": True, "q_group_size": 128, "w_bit": 4, "version": "GEMM" }
+
+model = AutoAWQForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b-hf"
+)
+
+# 量化
+model.quantize(tokenizer, quant_config=quant_config)
+
+# 保存
+model.save_quantized("llama-2-7b-awq-4bit")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📊 压缩方法对比总结</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>工具</th>
+                            <th>压缩比</th>
+                            <th>速度提升</th>
+                            <th>精度影响</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>FP16</strong></td>
+                            <td>原生</td>
+                            <td>2x</td>
+                            <td>1.5-2x</td>
+                            <td>无</td>
+                        </tr>
+                        <tr>
+                            <td><strong>INT8 (PTQ)</strong></td>
+                            <td>pytorch/onn x</td>
+                            <td>4x</td>
+                            <td>2-3x</td>
+                            <td>&lt;1%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GPTQ 4bit</strong></td>
+                            <td>auto-gptq</td>
+                            <td>8x</td>
+                            <td>2-3x</td>
+                            <td>1-2%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AWQ 4bit</strong></td>
+                            <td>llama.cpp</td>
+                            <td>8x</td>
+                            <td>3-4x</td>
+                            <td>&lt;1%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：量化选择</h4>
+                    <p style="font-size: 0.8em;">要在手机部署模型，应该选择什么量化方案？为什么？</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 2：蒸馏温度</h4>
+                    <p style="font-size: 0.8em;">温度 T 的作用是什么？T 过大或过小会怎样？</p>
+                </div>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">用 GPTQ 量化 BERT 模型并在 GLUE 基准上测试</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/2210.17323" style="color: #3b82f6;">GPTQ: Accurate Post-training Quantization</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2306.00978" style="color: #3b82f6;">AWQ: Activation-aware Weight Quantization</a></li>
+                    <li>🌐 <a href="https://github.com/ggerganov/llama.cpp" style="color: #3b82f6;">llama.cpp - GGUF 量化</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>3.3 推理优化技术</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="3-3-inference.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="3-1-distributed-training.html">← 分布式训练</a> |
+        <a href="3-3-inference.html">推理优化 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

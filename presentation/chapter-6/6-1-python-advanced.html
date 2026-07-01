@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.1 Python 编程进阶 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🐍 Python 编程进阶</h1>
+                <h4>AI 能力图谱 · 第 6 章第 1 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 掌握 Python 高级特性</li>
+                        <li>✅ 理解异步编程与并发</li>
+                        <li>✅ 运用性能优化技巧</li>
+                        <li>✅ 编写规范的 AI 工程代码</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>装饰器与上下文管理器</h2>
+                <pre><code class="python" data-trim data-noescape>
+# 装饰器示例：计时
+import time
+from functools import wraps
+
+def timer(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(f"{func.__name__} 耗时：{end-start:.3f}s")
+        return result
+    return wrapper
+
+@timer
+def train_model():
+    # 训练代码
+    pass
+
+# 上下文管理器
+from contextlib import contextmanager
+
+@contextmanager
+def timer_context(name):
+    start = time.time()
+    try:
+        yield
+    finally:
+        print(f"{name} 耗时：{time.time()-start:.3f}s")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>异步编程</h2>
+                <pre><code class="python" data-trim data-noescape>
+import asyncio
+import aiohttp
+
+async def fetch(session, url):
+    async with session.get(url) as response:
+        return await response.text()
+
+async def fetch_all(urls):
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch(session, url) for url in urls]
+        results = await asyncio.gather(*tasks)
+    return results
+
+# 运行
+urls = ["url1", "url2", "url3"]
+results = asyncio.run(fetch_all(urls))
+
+# async/await 在 AI API 调用中的应用
+async def batch_llm_call(prompts):
+    tasks = [call_llm_api(p) for p in prompts]
+    return await asyncio.gather(*tasks)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>性能优化技巧</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>向量化</h4>
+                        <pre style="font-size:0.6em;"><code># 慢：Python 循环
+result = []
+for i in range(len(data)):
+    result.append(data[i] * 2)
+
+# 快：NumPy 向量化
+result = np.array(data) * 2</code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>缓存</h4>
+                        <pre style="font-size:0.6em;"><code>from functools import lru_cache
+
+@lru_cache(maxsize=1000)
+def expensive_compute(x, y):
+    time.sleep(1)  # 模拟计算
+    return x + y</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>类型提示</h2>
+                <pre><code class="python" data-trim data-noescape>
+from typing import List, Dict, Optional, Callable, TypeVar
+
+T = TypeVar('T')
+
+def process_data(
+    items: List[str],
+    config: Optional[Dict[str, float]] = None,
+    callback: Optional[Callable[[str], T]] = None
+) -> List[T]:
+    """带类型提示的函数"""
+    results = []
+    for item in items:
+        if callback:
+            results.append(callback(item))
+    return results
+
+# 使用 mypy 进行类型检查
+# mypy --strict module.py
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">实现一个带缓存和重试机制的异步 API 客户端</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>📘 《Fluent Python》- Luciano Ramalho</li>
+                    <li>🌐 <a href="https://docs.python.org/3/library/asyncio.html" style="color: #3b82f6;">Python Asyncio 文档</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>6.2 算法工程化</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="6-2-engineering.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="6-2-engineering.html">算法工程化 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

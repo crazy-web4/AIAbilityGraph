@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.2 提示词工程 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>💡 提示词工程</h1>
+                <h4>AI 能力图谱 · 第 4 章第 2 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 掌握提示词设计的核心原则</li>
+                        <li>✅ 运用 Few-Shot、CoT 等高级技巧</li>
+                        <li>✅ 理解思维链与自我一致性</li>
+                        <li>✅ 构建可复用的提示词模板</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>提示词设计原则</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>CRISPE 框架</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li><strong>C</strong>ontext: 背景信息</li>
+                            <li><strong>R</strong>ole: 角色设定</li>
+                            <li><strong>I</strong>nstruction: 指令</li>
+                            <li><strong>S</strong>tatement: 具体问题</li>
+                            <li><strong>P</strong>ersona: 人格</li>
+                            <li><strong>E</strong>xperiment: 实验输出</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>示例</h4>
+                        <pre style="font-size: 0.6em;"><code>你是一位资深 Python 工程师 (Role).
+我需要调试一个并发问题 (Context).
+请分析以下代码的线程安全问题
+(Instruction):
+
+[代码...]
+
+给出修复建议和修改后的代码
+(Statement).
+                        </code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Few-Shot Prompting</h2>
+                <pre><code class="python" data-trim data-noescape>
+# Few-Shot 示例
+prompt = """
+将以下中文翻译成英文:
+
+中文：你好，很高兴认识你
+英文：Hello, nice to meet you
+
+中文：今天天气真好
+英文：The weather is really nice today
+
+中文：我喜欢学习机器学习
+英文："""
+
+# 模型会续写：I like learning machine learning
+                </code></pre>
+                <div class="highlight-box">
+                    <p><strong>关键</strong>：提供 2-5 个高质量示例，格式一致</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>思维链 (Chain of Thought)</h2>
+                <div class="highlight-box">
+                    <p><strong>核心思想</strong>：让模型展示推理过程，提高准确性</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+# 标准提示
+prompt = "小明有 5 个苹果，吃了 2 个，又买了 3 个，现在有几个？"
+
+# CoT 提示
+prompt = """小明有 5 个苹果，吃了 2 个，又买了 3 个，现在有几个？
+
+让我们一步步思考：
+1. 开始有 5 个苹果
+2. 吃了 2 个，剩下 5-2=3 个
+3. 又买了 3 个，现在有 3+3=6 个
+
+答案：6 个
+"""
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>自我一致性 (Self-Consistency)</h2>
+                <pre><code class="python" data-trim data-noescape>
+# 多次采样，投票选择
+from openai import OpenAI
+
+client = OpenAI()
+
+def self_consistency_query(prompt, n=5):
+    responses = client.chat.completions.create(
+        model="gpt-4-turbo-preview",
+        messages=[{"role": "user", "content": prompt}],
+        n=n,  # 生成 n 个回答
+        temperature=0.7
+    )
+
+    # 统计最常见答案
+    answers = [c.message.content for c in responses.choices]
+    from collections import Counter
+    return Counter(answers).most_common(1)[0][0]
+
+# 适用场景：数学推理、逻辑问题
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>提示词模板</h2>
+                <pre><code class="python" data-trim data-noescape>
+from jinja2 import Template
+
+# 创建模板
+template = Template("""
+你是一位{{ role }}专家。
+
+任务：{{ task }}
+背景：{{ context }}
+
+要求:
+- 使用专业术语
+- 提供具体示例
+- 输出格式：{{ output_format }}
+
+用户问题：{{ question }}
+""")
+
+# 使用模板
+prompt = template.render(
+    role="机器学习",
+    task="解释支持向量机",
+    context="面向大学生教学",
+    output_format="Markdown，包含公式和代码",
+    question="什么是 SVM？"
+)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1</h4>
+                    <p style="font-size: 0.8em;">设计一个 Few-Shot 提示词用于情感分析任务</p>
+                </div>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">实现一个支持 CoT 的问答系统</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/2201.11903" style="color: #3b82f6;">Chain of Thought Prompting</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2203.11171" style="color: #3b82f6;">Self-Consistency Improves CoT</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>4.3 RAG 应用开发</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="4-3-rag.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="4-1-api-development.html">← API 开发</a> |
+        <a href="4-3-rag.html">RAG →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

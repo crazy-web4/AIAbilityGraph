@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.3 GPU/推理资源调度 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>📅 GPU/推理资源调度</h1>
+                <h4>AI 能力图谱 · 第 7 章第 3 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 GPU 调度策略</li>
+                        <li>✅ 掌握 MPS 多进程服务</li>
+                        <li>✅ 学会 Kubernetes GPU 编排</li>
+                        <li>✅ 构建高效推理服务</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>GPU 共享技术</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>NVIDIA MPS</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>多进程共享 GPU</li>
+                            <li>适合小模型多实例</li>
+                            <li>需主动管理</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>MIG (Multi-Instance)</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>硬件级隔离</li>
+                            <li>A100/H100 专属</li>
+                            <li>最高 7 实例/GPU</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre><code class="bash" data-trim data-noescape>
+# 启用 MPS
+export CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps
+export CUDA_MPS_LOG_DIRECTORY=/tmp/nvidia-log
+nvidia-cuda-mps-control -d
+
+# 查看 GPU 使用情况
+nvidia-smi
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Kubernetes GPU 调度</h2>
+                <pre><code class="yaml" data-trim data-noescape>
+# 限制 GPU 使用
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-pod
+spec:
+  containers:
+  - name: inference
+    image: ai-service:latest
+    resources:
+      requests:
+        nvidia.com/gpu: 1  # 请求 1 个 GPU
+        memory: "8Gi"
+      limits:
+        nvidia.com/gpu: 1
+        memory: "16Gi"
+---
+# GPU 时间片调度 (vGPU)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: time-slicing
+  namespace: nvidia-device-plugin
+data:
+  config: |
+    version: v1
+    sharing:
+      - resources:
+        - name: nvidia.com/gpu
+          replicas: 4  # 1 GPU 分 4 份
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>推理服务优化</h2>
+                <div class="highlight-box">
+                    <p><strong>Continuous Batching</strong>：动态批处理，提高 GPU 利用率</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+# vLLM continuous batching 示例
+from vllm import LLM, SamplingParams
+
+llm = LLM(model="meta-llama/Llama-2-7b",
+          max_num_seqs=256,      # 最大并发序列
+          max_num_batched_tokens=4096)  # 每批最大 token
+
+# 自动批处理
+prompts = ["..." for _ in range(100)]  # 100 个请求
+outputs = llm.generate(prompts, params)
+# 自动合并到最优批次
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📊 调度策略对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>策略</th>
+                            <th>利用率</th>
+                            <th>隔离性</th>
+                            <th>复杂度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>独占</strong></td>
+                            <td>低</td>
+                            <td>高</td>
+                            <td>低</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MPS</strong></td>
+                            <td>中</td>
+                            <td>低</td>
+                            <td>中</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MIG</strong></td>
+                            <td>中</td>
+                            <td>高</td>
+                            <td>中</td>
+                        </tr>
+                        <tr>
+                            <td><strong>K8s+MIG</strong></td>
+                            <td>高</td>
+                            <td>高</td>
+                            <td>高</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>设计题</h4>
+                    <p style="font-size: 0.8em;">为一个日活 10 万的 LLM 应用设计 GPU 调度方案</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://docs.nvidia.com/deploy/mps/" style="color: #3b82f6;">NVIDIA MPS 文档</a></li>
+                    <li>🌐 <a href="https://k8s-device-plugin.readthedocs.io/" style="color: #3b82f6;">K8s GPU 插件</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 全部完成！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>恭喜完成 <strong>AI 能力图谱 PPT 教程</strong> 全部学习！</p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="../index.html" style="color: #3b82f6;">返回导航首页 →</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="7-2-cost-optimization.html">← 成本优化</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

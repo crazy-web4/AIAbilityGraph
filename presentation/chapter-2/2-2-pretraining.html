@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.2 预训练与微调技术 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .warning-box { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .formula { font-size: 1.2em; text-align: center; padding: 0.5em; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 0.5em 0; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>📚 预训练与微调技术</h1>
+                <h4>AI 能力图谱 · 第 2 章第 2 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>预训练 · SFT · RLHF · 完整流程</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解大模型预训练的核心流程</li>
+                        <li>✅ 掌握 supervised fine-tuning (SFT) 技术</li>
+                        <li>✅ 理解 RLHF 对齐原理与实现</li>
+                        <li>✅ 能够设计完整的微调 pipeline</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>大模型训练三阶段</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>阶段 1: 预训练</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>海量无标签数据</li>
+                            <li>自监督学习</li>
+                            <li>学习通用表示</li>
+                            <li>计算成本最高</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>阶段 2: SFT</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>高质量指令数据</li>
+                            <li>监督学习</li>
+                            <li>学习遵循指令</li>
+                            <li>计算成本中等</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="concept-card" style="margin-top: 0.8em;">
+                    <h4>阶段 3: RLHF 对齐</h4>
+                    <ul style="font-size: 0.7em;">
+                        <li>人类偏好数据</li>
+                        <li>强化学习优化</li>
+                        <li>与人类价值观对齐</li>
+                        <li>计算成本较低</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>预训练目标函数</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>因果语言建模</h4>
+                        <div class="formula" style="font-size: 0.9em;">
+                            $$\mathcal{L} = -\sum_{t=1}^T \log P(x_t | x_{<t})$$
+                        </div>
+                        <p style="font-size: 0.7em;">GPT 系列使用</p>
+                    </div>
+                    <div class="concept-card">
+                        <h4>掩码语言建模</h4>
+                        <div class="formula" style="font-size: 0.9em;">
+                            $$\mathcal{L} = -\sum_{i \in M} \log P(x_i | x_{\setminus M})$$
+                        </div>
+                        <p style="font-size: 0.7em;">BERT 使用</p>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+# 因果语言建模损失
+def causal_lm_loss(logits, labels):
+    """
+    logits: (batch, seq_len, vocab_size)
+    labels: (batch, seq_len)
+    """
+    shift_logits = logits[..., :-1, :].contiguous()
+    shift_labels = labels[..., 1:].contiguous()
+
+    loss_fct = nn.CrossEntropyLoss()
+    loss = loss_fct(
+        shift_logits.view(-1, shift_logits.size(-1)),
+        shift_labels.view(-1)
+    )
+    return loss
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>监督微调 (SFT)</h2>
+                <pre><code class="python" data-trim data-noescape>
+# examples/2-2-pretraining/sft_finetune.py
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from datasets import load_dataset
+import torch
+
+# 加载模型和 tokenizer
+model_name = "meta-llama/Llama-2-7b-hf"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# 准备指令数据
+dataset = load_dataset("json", data_files="instructions.jsonl")
+
+def tokenize_function(examples):
+    return tokenizer(
+        examples["text"],
+        padding="max_length",
+        truncation=True,
+        max_length=512
+    )
+
+tokenized_dataset = dataset.map(tokenize_function, batched=True)
+
+# 训练配置
+from transformers import TrainingArguments
+training_args = TrainingArguments(
+    output_dir="./sft-output",
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=4,
+    learning_rate=2e-5,
+    num_train_epochs=3,
+    warmup_ratio=0.1,
+    logging_steps=10,
+    save_strategy="epoch",
+    fp16=True
+)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>RLHF - 人类反馈强化学习</h2>
+                <div class="highlight-box">
+                    <p><strong>核心思想</strong>：用人类偏好数据训练奖励模型，再用 PPO 优化策略</p>
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>步骤 1: 训练奖励模型</h4>
+                        <pre style="font-size: 0.6em;"><code>收集人类偏好数据:
+  (prompt, response_A, response_B, choice)
+
+训练奖励模型:
+  R_θ(prompt, response) → scalar score</code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>步骤 2: PPO 优化</h4>
+                        <pre style="font-size: 0.6em;"><code>最大化奖励 + KL 惩罚:
+  L(π) = E[r(x,y) - β·KL(π||π_ref)]
+
+PPO update:
+  ∇L = E[∇logπ(a|s)·A(s,a)]</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>RLHF 完整实现</h2>
+                <pre><code class="python" data-trim data-noescape>
+# examples/2-2-pretraining/rlhf_example.py
+from trl import PPOTrainer, PPOConfig
+from transformers import AutoModelForCausalLM
+from torch.nn.functional import log_softmax
+
+# 加载 SFT 后的模型
+model = AutoModelForCausalLM.from_pretrained("./sft-model")
+
+# PPO 配置
+ppo_config = PPOConfig(
+    model_name="llama-2-7b-sft",
+    learning_rate=1e-6,
+    batch_size=32,
+    mini_batch_size=4,
+    ppo_epochs=4,
+    init_kl_coef=0.2,
+    adap_kl_ctrl=True
+)
+
+# 创建 PPO Trainer
+ppo_trainer = PPOTrainer(ppo_config, model, ref_model=None)
+
+# PPO 训练循环
+for epoch in range(num_epochs):
+    for batch in dataloader:
+        question_tensors = batch["input_ids"]
+
+        # 生成回复
+        response_tensors = ppo_trainer.generate(question_tensors)
+
+        # 计算奖励
+        rewards = [reward_model(score) for score in batch["scores"]]
+
+        # PPO 更新
+        stats = ppo_trainer.step(question_tensors, response_tensors, rewards)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1: 预训练数据量</h4>
+                    <p style="font-size: 0.8em;">训练一个 7B 模型需要多少 token 才能达到较好的效果？</p>
+                    <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">答案：约 2T token（~300B tokens 是最低要求）</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 2: SFT vs PT</h4>
+                    <p style="font-size: 0.8em;">为什么 SFT 比预训练需要的数据少得多？</p>
+                </div>
+                <div class="concept-card">
+                    <h4>思考题：RLHF 的局限性</h4>
+                    <p style="font-size: 0.8em;">RLHF 有哪些局限性？有什么替代方案？</p>
+                    <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">提示：DPO、ORPO 等直接偏好优化方法</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/2203.02155" style="color: #3b82f6;">InstructGPT (RLHF 开创性工作)</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2305.10403" style="color: #3b82f6;">Llama 2: Open Foundation Models</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2305.18290" style="color: #3b82f6;">DPO: Direct Preference Optimization</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节学习！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>2.3 参数高效微调 (PEFT)</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="2-3-peft.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="2-1-architecture.html">← 架构设计</a> |
+        <a href="2-3-peft.html">PEFT →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+    </script>
+</body>
+</html>

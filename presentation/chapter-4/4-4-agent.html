@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.4 Agent 应用开发 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+        .architecture-diagram { background: rgba(255,255,255,0.03); padding: 1em; border-radius: 8px; font-family: monospace; font-size: 0.6em; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🤖 Agent 应用开发</h1>
+                <h4>AI 能力图谱 · 第 4 章第 4 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 AI Agent 的核心组成</li>
+                        <li>✅ 掌握 Function Calling 技术</li>
+                        <li>✅ 实现工具调用与工作流</li>
+                        <li>✅ 构建自主 Agent 系统</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Agent 核心架构</h2>
+                <div class="architecture-diagram">
+                    <pre>
+┌────────────────────────────────────────┐
+│            AI Agent                    │
+├────────────────────────────────────────┤
+│  感知 → 规划 → 行动 → 反思             │
+│   │      │      │      │               │
+│   ▼      ▼      ▼      ▼               │
+│ 输入   推理   工具   优化              │
+│ (输入)  (LLM) (API)  (反馈)            │
+└────────────────────────────────────────┘
+                    </pre>
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>核心组件</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>LLM：大脑/推理引擎</li>
+                            <li>记忆：短期 + 长期记忆</li>
+                            <li>工具：API、数据库等</li>
+                            <li>规划：任务分解</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>典型应用</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>客服机器人</li>
+                            <li>数据分析助手</li>
+                            <li>代码助手</li>
+                            <li>研究助手</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Function Calling</h2>
+                <pre><code class="python" data-trim data-noescape>
+from openai import OpenAI
+
+client = OpenAI()
+
+# 定义工具
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "获取指定城市的天气",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "城市名称"
+                }
+            },
+            "required": ["city"]
+        }
+    }
+}]
+
+# 调用
+response = client.chat.completions.create(
+    model="gpt-4-turbo-preview",
+    messages=[{"role": "user", "content": "北京天气怎么样？"}],
+    tools=tools
+)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>LangChain Agent</h2>
+                <pre><code class="python" data-trim data-noescape>
+from langchain.agents import initialize_agent, Tool
+from langchain.llms import OpenAI
+from langchain.utilities import SerpAPIWrapper
+
+# 初始化工具
+search = SerpAPIWrapper()
+tools = [
+    Tool(
+        name="Search",
+        func=search.run,
+        description="用于搜索最新信息"
+    ),
+    Tool(
+        name="Calculator",
+        func=lambda x: str(eval(x)),
+        description="用于数学计算"
+    )
+]
+
+# 创建 Agent
+llm = OpenAI(temperature=0)
+agent = initialize_agent(
+    tools,
+    llm,
+    agent="zero-shot-react-description"
+)
+
+# 使用
+response = agent.run("今天北京的天气如何？气温 25 度，湿度 60%，感觉怎么样？")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>ReAct 模式</h2>
+                <div class="highlight-box">
+                    <p><strong>ReAct</strong> = Reasoning + Acting</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+# ReAct Prompt 示例
+react_prompt = """
+问题：特斯拉的 CEO 是谁？他还有其他公司吗？
+
+思考 1：我需要先搜索特斯拉的 CEO
+行动 1: Search[特斯拉 CEO]
+观察 1：埃隆·马斯克
+
+思考 2：马斯克还有其他公司
+行动 2: Search[埃隆·马斯克 公司]
+观察 2：SpaceX、Neuralink、The Boring Company
+
+思考 3：我有足够的信息
+最终答案：特斯拉的 CEO 是埃隆·马斯克，
+他还拥有 SpaceX、Neuralink 和 The Boring Company
+"""
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">用 LangChain 创建一个能查询天气和新闻的 Agent</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/2210.03629" style="color: #3b82f6;">ReAct 论文</a></li>
+                    <li>🌐 <a href="https://python.langchain.com/docs/modules/agents/" style="color: #3b82f6;">LangChain Agents</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>4.5 前端 AI 应用开发</strong></p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="4-3-rag.html">← RAG</a> |
+        <a href="4-5-frontend-ai.html">前端 AI →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.1 AI 算力与资源规划 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>💻 AI 算力与资源规划</h1>
+                <h4>AI 能力图谱 · 第 7 章第 1 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 GPU 硬件选型</li>
+                        <li>✅ 掌握算力需求估算方法</li>
+                        <li>✅ 学会云资源规划</li>
+                        <li>✅ 优化成本与性能平衡</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>GPU 选型对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>GPU</th>
+                            <th>显存</th>
+                            <th>FP16 算力</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>A100 40GB</strong></td>
+                            <td>40GB</td>
+                            <td>312 TFLOPS</td>
+                            <td>训练/推理</td>
+                        </tr>
+                        <tr>
+                            <td><strong>A100 80GB</strong></td>
+                            <td>80GB</td>
+                            <td>312 TFLOPS</td>
+                            <td>大模型训练</td>
+                        </tr>
+                        <tr>
+                            <td><strong>H100</strong></td>
+                            <td>80GB</td>
+                            <td>989 TFLOPS</td>
+                            <td>超大模型</td>
+                        </tr>
+                        <tr>
+                            <td><strong>L40S</strong></td>
+                            <td>48GB</td>
+                            <td>180 TFLOPS</td>
+                            <td>推理/微调</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RTX 4090</strong></td>
+                            <td>24GB</td>
+                            <td>82 TFLOPS</td>
+                            <td>开发/小模型</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>显存需求估算</h2>
+                <pre><code class="python" data-trim data-noescape>
+def estimate_gpu_memory(model_params, batch_size, seq_len):
+    """
+    估算 GPU 显存需求
+
+    参数:
+        model_params: 模型参数量 (B)
+        batch_size: 批次大小
+        seq_len: 序列长度
+    """
+    # 模型权重 (FP16)
+    model_memory = model_params * 2  # 2 bytes per param
+
+    # 优化器状态 (Adam: 8 bytes per param)
+    optimizer_memory = model_params * 8
+
+    # 梯度 (FP16)
+    gradient_memory = model_params * 2
+
+    # 激活值 (近似)
+    activation_memory = batch_size * seq_len * 1024 * 2
+
+    total = model_memory + optimizer_memory + gradient_memory + activation_memory
+    return total / (1024**3)  # GB
+
+# 示例：7B 模型训练
+mem = estimate_gpu_memory(7e9, 32, 512)
+print(f"预计显存需求：{mem:.1f} GB")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>云 vs 自建</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>云服务</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>✅ 按需付费</li>
+                            <li>✅ 弹性扩展</li>
+                            <li>❌ 长期成本高</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>自建</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>✅ 长期成本低</li>
+                            <li>✅ 数据可控</li>
+                            <li>❌ 前期投入大</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+# 成本对比示例
+cloud_monthly = 20 * 24 * 30 * 0.5  # $0.5/小时，20 卡
+self_build = (50000 * 20 + 5000) / 36  # 硬件/3 年折旧
+
+print(f"云：${cloud_monthly:.0f}/月")
+print(f"自建：${self_build:.0f}/月")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>计算题</h4>
+                    <p style="font-size: 0.8em;">估算训练 Llama-2-70B 需要多少 GPU 显存？至少需要多少张 A100？</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://lambdalabs.com/" style="color: #3b82f6;">GPU 云价格对比</a></li>
+                    <li>🌐 <a href="https://github.com/timsainb/gpu-memory" style="color: #3b82f6;">GPU 显存计算工具</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>7.2 成本优化</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="7-2-cost-optimization.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="7-2-cost-optimization.html">成本优化 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

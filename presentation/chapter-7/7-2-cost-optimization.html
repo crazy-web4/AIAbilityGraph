@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.2 模型服务容量与成本优化 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>💰 模型服务容量与成本优化</h1>
+                <h4>AI 能力图谱 · 第 7 章第 2 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解成本结构与优化方向</li>
+                        <li>✅ 掌握量化与蒸馏技术</li>
+                        <li>✅ 学会动态批处理与调度</li>
+                        <li>✅ 构建成本感知系统</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>成本分解</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>成本项</th>
+                            <th>占比</th>
+                            <th>优化空间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>GPU 计算</strong></td>
+                            <td>60-80%</td>
+                            <td>高</td>
+                        </tr>
+                        <tr>
+                            <td><strong>内存存储</strong></td>
+                            <td>10-20%</td>
+                            <td>中</td>
+                        </tr>
+                        <tr>
+                            <td><strong>网络传输</strong></td>
+                            <td>5-10%</td>
+                            <td>低</td>
+                        </tr>
+                        <tr>
+                            <td><strong>运维人力</strong></td>
+                            <td>10-20%</td>
+                            <td>中</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>优化策略</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>模型层面</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>量化 (INT8/INT4)</li>
+                            <li>蒸馏到小模型</li>
+                            <li>稀疏化</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>系统层面</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>动态批处理</li>
+                            <li>请求合并</li>
+                            <li>GPU 共享</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="two-column" style="margin-top:0.8em;">
+                    <div class="concept-card">
+                        <h4>调度层面</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>Spot 实例</li>
+                            <li>峰谷调度</li>
+                            <li>多区域部署</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>业务层面</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>请求限流</li>
+                            <li>缓存热门结果</li>
+                            <li>分级服务</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>量化效果</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>精度</th>
+                            <th>显存</th>
+                            <th>速度</th>
+                            <th>精度损失</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>FP16</td>
+                            <td>基准</td>
+                            <td>基准</td>
+                            <td>无</td>
+                        </tr>
+                        <tr>
+                            <td>INT8</td>
+                            <td>-50%</td>
+                            <td>+30%</td>
+                            <td>&lt;1%</td>
+                        </tr>
+                        <tr>
+                            <td>INT4</td>
+                            <td>-75%</td>
+                            <td>+50%</td>
+                            <td>1-3%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>计算题</h4>
+                    <p style="font-size: 0.8em;">某服务每天 100 万请求，每请求平均 100 tokens，用 GPT-4 成本多少？如改用开源 7B 量化模型可节省多少？</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://www.anyscale.com/blog/cost-optimization-for-llms" style="color: #3b82f6;">LLM Cost Optimization Guide</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>7.3 GPU/推理资源调度</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="7-3-gpu-scheduling.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="7-1-gpu-resources.html">← 资源规划</a> |
+        <a href="7-3-gpu-scheduling.html">资源调度 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

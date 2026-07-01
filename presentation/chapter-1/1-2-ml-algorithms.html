@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.2 经典机器学习算法 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.15);
+            border-left: 4px solid #3b82f6;
+            padding: 0.8em 1.2em;
+            margin: 0.8em 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85em;
+        }
+        .warning-box {
+            background: rgba(245, 158, 11, 0.15);
+            border-left: 4px solid #f59e0b;
+            padding: 0.8em 1.2em;
+            margin: 0.8em 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85em;
+        }
+        .formula {
+            font-size: 1.3em;
+            text-align: center;
+            padding: 0.5em;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin: 0.5em 0;
+        }
+        .comparison-table { font-size: 0.65em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .three-column { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .algorithm-card { background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(16,185,129,0.1) 100%); border: 1px solid rgba(59,130,246,0.3); padding: 1em; border-radius: 8px; margin: 0.5em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+        .tag { display: inline-block; background: rgba(59,130,246,0.2); color: #60a5fa; padding: 0.2em 0.6em; border-radius: 4px; font-size: 0.75em; margin-right: 0.3em; }
+        .tag.success { background: rgba(16,185,129,0.2); color: #34d399; }
+        .tag.warning { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- 封面 -->
+            <section>
+                <h1>🤖 经典机器学习算法</h1>
+                <h4>AI 能力图谱 · 第 1 章第 2 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>监督学习 | 无监督学习 | 集成方法</p>
+                    <p style="margin-top: 1em;">从理论基础到实战应用</p>
+                </div>
+            </section>
+
+            <!-- 学习目标 -->
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <p style="font-size: 0.9em;">学完本节后，你将能够：</p>
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解并实现常见监督学习算法（线性回归、逻辑回归、SVM、决策树）</li>
+                        <li>✅ 掌握无监督学习方法（K-Means 聚类、PCA 降维）</li>
+                        <li>✅ 运用集成方法提升模型性能（Bagging、Boosting、Random Forest）</li>
+                        <li>✅ 根据数据特点选择合适的算法</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 机器学习概览 -->
+            <section>
+                <h2>📊 机器学习概览</h2>
+                <div class="two-column">
+                    <div class="algorithm-card">
+                        <h4>📈 监督学习</h4>
+                        <p style="font-size: 0.75em;">从带标签的数据中学习</p>
+                        <hr style="border-color: rgba(255,255,255,0.1);">
+                        <ul style="font-size: 0.7em;">
+                            <li>线性回归</li>
+                            <li>逻辑回归</li>
+                            <li>SVM</li>
+                            <li>决策树</li>
+                        </ul>
+                    </div>
+                    <div class="algorithm-card">
+                        <h4>🔍 无监督学习</h4>
+                        <p style="font-size: 0.75em;">发现数据的内在结构</p>
+                        <hr style="border-color: rgba(255,255,255,0.1);">
+                        <ul style="font-size: 0.7em;">
+                            <li>K-Means 聚类</li>
+                            <li>层次聚类</li>
+                            <li>PCA 降维</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="algorithm-card" style="margin-top: 0.8em;">
+                    <h4>🚀 集成方法</h4>
+                    <p style="font-size: 0.75em;">组合多个模型获得更好性能</p>
+                    <div style="margin-top: 0.5em;">
+                        <span class="tag">Bagging</span>
+                        <span class="tag success">Boosting</span>
+                        <span class="tag warning">Stacking</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 监督学习 -->
+            <section>
+                <h2>1.2.1 监督学习算法</h2>
+                <div class="highlight-box">
+                    <p><strong>监督学习</strong>：从<strong>带标签</strong>的训练数据中学习映射函数 $f: X \rightarrow Y$</p>
+                </div>
+            </section>
+
+            <!-- 线性回归 -->
+            <section>
+                <h3>1. 线性回归</h3>
+                <div class="formula">
+                    $$\hat{y} = \mathbf{w}^T\mathbf{x} + b$$
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>适用场景</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>房价预测</li>
+                            <li>销量预测</li>
+                            <li>温度预测</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>损失函数</h4>
+                        <p style="font-size: 0.7em;">均方误差 (MSE)</p>
+                        <div class="formula" style="font-size: 0.9em;">
+                            $$L(\mathbf{w}) = \frac{1}{n}\sum_{i=1}^n (y_i - \hat{y}_i)^2$$
+                        </div>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# 训练数据
+X_train = np.array([[1], [2], [3], [4], [5]])
+y_train = np.array([2, 4, 5, 4, 5])
+
+# 创建并训练模型
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# 预测与评估
+X_test = np.array([[6], [7], [8]])
+y_pred = model.predict(X_test)
+
+print(f"拟合方程：y = {model.coef_[0]:.3f}x + {model.intercept_:.3f}")
+                </code></pre>
+            </section>
+
+            <!-- 逻辑回归 -->
+            <section>
+                <h3>2. 逻辑回归</h3>
+                <div class="formula">
+                    $$\sigma(z) = \frac{1}{1 + e^{-z}}$$
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>适用场景</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>垃圾邮件检测</li>
+                            <li>疾病诊断</li>
+                            <li>用户流失预测</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>核心思想</h4>
+                        <p style="font-size: 0.75em;">用 Sigmoid 函数将线性输出映射到 (0, 1)，解释为概率</p>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+
+# 生成数据
+np.random.seed(42)
+X = np.vstack([
+    np.random.randn(100, 2) + np.array([2, 2]),   # 类别 0
+    np.random.randn(100, 2) + np.array([-2, -2])  # 类别 1
+])
+y = np.array([0]*100 + [1]*100)
+
+# 训练模型
+clf = LogisticRegression(random_state=42)
+clf.fit(X_train, y_train)
+
+# 评估
+y_pred = clf.predict(X_test)
+print(f"准确率：{accuracy_score(y_test, y_pred):.3f}")
+                </code></pre>
+            </section>
+
+            <!-- SVM -->
+            <section>
+                <h3>3. 支持向量机 (SVM)</h3>
+                <div class="highlight-box">
+                    <p><strong>核心思想</strong>：找到最大化间隔的决策超平面</p>
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>关键概念</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li><strong>支持向量</strong>：决定边界的少数关键样本</li>
+                            <li><strong>间隔</strong>：两类样本到超平面的最小距离</li>
+                            <li><strong>核技巧</strong>：映射到高维空间</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>核函数选择</h4>
+                        <ul style="font-size: 0.65em;">
+                            <li><code>linear</code>: 线性可分数据</li>
+                            <li><code>rbf</code>: 通用非线性</li>
+                            <li><code>poly</code>: 多项式关系</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+from sklearn import svm, datasets
+from sklearn.model_selection import cross_val_score
+
+iris = datasets.load_iris()
+X, y = iris.data, iris.target
+
+# SVM 分类器（RBF 核）
+clf = svm.SVC(kernel='rbf', C=1.0, gamma='scale')
+
+# 交叉验证
+scores = cross_val_score(clf, X, y, cv=5)
+print(f"SVM 准确率：{scores.mean():.3f} (+/- {scores.std()*2:.3f})")
+                </code></pre>
+            </section>
+
+            <!-- 决策树 -->
+            <section>
+                <h3>4. 决策树</h3>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>适用场景</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>风控评估</li>
+                            <li>医疗诊断</li>
+                            <li>用户分群</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>关键概念</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li><strong>信息增益</strong>: ID3 算法</li>
+                            <li><strong>信息增益比</strong>: C4.5 算法</li>
+                            <li><strong>基尼不纯度</strong>: CART 算法</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_breast_cancer
+
+data = load_breast_cancer()
+X_train, X_test, y_train, y_test = train_test_split(
+    data.data, data.target, test_size=0.3, random_state=42
+)
+
+# 创建决策树（限制深度防止过拟合）
+tree = DecisionTreeClassifier(
+    max_depth=4,
+    min_samples_split=10,
+    criterion='gini'
+)
+tree.fit(X_train, y_train)
+
+print(f"测试准确率：{tree.score(X_test, y_test):.3f}")
+print(f"特征重要性：{tree.feature_importances_}")
+                </code></pre>
+            </section>
+
+            <!-- 无监督学习 -->
+            <section>
+                <h2>1.2.2 无监督学习</h2>
+                <div class="highlight-box">
+                    <p>无监督学习：从<strong>无标签</strong>数据中发现模式和结构</p>
+                </div>
+            </section>
+
+            <!-- K-Means -->
+            <section>
+                <h3>1. K-Means 聚类</h3>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>算法步骤</h4>
+                        <ol style="font-size: 0.7em;">
+                            <li>随机初始化 K 个聚类中心</li>
+                            <li>将样本分配到最近的中心</li>
+                            <li>重新计算聚类中心</li>
+                            <li>重复 2-3 直到收敛</li>
+                        </ol>
+                    </div>
+                    <div class="concept-card">
+                        <h4>适用场景</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>客户分群</li>
+                            <li>图像压缩</li>
+                            <li>异常检测</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+from sklearn.cluster import KMeans
+from sklearn.datasets import make_blobs
+
+# 生成数据
+X, y_true = make_blobs(n_samples=300, centers=4, random_state=0)
+
+# K-Means 聚类
+kmeans = KMeans(n_clusters=4, init='k-means++', n_init=10)
+y_pred = kmeans.fit_predict(X)
+
+# 评估：轮廓系数
+from sklearn.metrics import silhouette_score
+score = silhouette_score(X, y_pred)
+print(f"轮廓系数：{score:.3f}")  # 越接近 1 越好
+print(f"聚类中心：{kmeans.cluster_centers_}")
+                </code></pre>
+            </section>
+
+            <!-- PCA 降维 -->
+            <section>
+                <h3>2. PCA 降维</h3>
+                <div class="highlight-box">
+                    <p><strong>核心思想</strong>：找到数据方差最大的正交投影方向</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+from sklearn.decomposition import PCA
+from sklearn.datasets import load_digits
+from sklearn.preprocessing import StandardScaler
+
+# 加载数据（64 维）
+digits = load_digits()
+X = digits.data
+y = digits.target
+
+# 标准化（PCA 前必须！）
+X_scaled = StandardScaler().fit_transform(X)
+
+# PCA 降维到 2D
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+print(f"第一主成分解释方差：{pca.explained_variance_ratio_[0]:.3f}")
+print(f"累计解释方差：{sum(pca.explained_variance_ratio_):.3f}")
+
+# 可视化
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='viridis')
+plt.colorbar(label='数字类别')
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%})')
+plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%})')
+                </code></pre>
+            </section>
+
+            <!-- 集成方法 -->
+            <section>
+                <h2>1.2.3 集成方法</h2>
+                <div class="two-column">
+                    <div class="algorithm-card">
+                        <h4>🔄 Bagging (并行)</h4>
+                        <p style="font-size: 0.75em;">同时训练多个模型，投票/平均</p>
+                        <ul style="font-size: 0.7em;">
+                            <li>随机森林</li>
+                            <li>BaggingClassifier</li>
+                        </ul>
+                    </div>
+                    <div class="algorithm-card">
+                        <h4>⬆️ Boosting (串行)</h4>
+                        <p style="font-size: 0.75em;">依次训练，每轮修正前一轮错误</p>
+                        <ul style="font-size: 0.7em;">
+                            <li>AdaBoost</li>
+                            <li>Gradient Boosting</li>
+                            <li>XGBoost / LightGBM</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 随机森林 -->
+            <section>
+                <h3>随机森林</h3>
+                <pre><code class="python" data-trim data-noescape>
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+
+# 生成数据
+X, y = make_classification(n_samples=1000, n_features=20, random_state=42)
+
+# 随机森林
+rf = RandomForestClassifier(
+    n_estimators=100,      # 树的数量
+    max_depth=10,          # 树的最大深度
+    min_samples_split=5,   # 再划分所需最小样本数
+    max_features='sqrt',   # 特征数 = sqrt(特征总数)
+    oob_score=True         # 袋外样本评估
+)
+rf.fit(X_train, y_train)
+
+print(f"袋外分数 (OOB): {rf.oob_score_:.3f}")
+print(f"测试集分数：{rf.score(X_test, y_test):.3f}")
+                </code></pre>
+                <div class="highlight-box">
+                    <p><strong>优势</strong>：不易过拟合、可处理高维数据、特征重要性可解释</p>
+                </div>
+            </section>
+
+            <!-- 梯度提升树 -->
+            <section>
+                <h3>梯度提升树 (GBDT)</h3>
+                <pre><code class="python" data-trim data-noescape>
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import cross_val_score
+
+data = load_breast_cancer()
+X, y = data.data, data.target
+
+# 梯度提升树
+gb = GradientBoostingClassifier(
+    n_estimators=100,
+    learning_rate=0.1,
+    max_depth=4,
+    subsample=0.8  # 每棵树使用 80% 样本
+)
+
+# 交叉验证
+scores = cross_val_score(gb, X, y, cv=5)
+print(f"GBDT 准确率：{scores.mean():.3f} (+/- {scores.std()*2:.3f})")
+                </code></pre>
+                <div class="warning-box">
+                    <p><strong>注意</strong>：GBDT 比随机森林更容易过拟合，需要仔细调参</p>
+                </div>
+            </section>
+
+            <!-- 算法选择指南 -->
+            <section>
+                <h2>🧭 算法选择指南</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>任务类型</th>
+                            <th>数据规模</th>
+                            <th>推荐算法</th>
+                            <th>理由</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>二分类</td>
+                            <td>小样本</td>
+                            <td>逻辑回归/SVM</td>
+                            <td>简单、不易过拟合</td>
+                        </tr>
+                        <tr>
+                            <td>多分类</td>
+                            <td>中等</td>
+                            <td>随机森林/XGBoost</td>
+                            <td>准确率高、鲁棒</td>
+                        </tr>
+                        <tr>
+                            <td>回归</td>
+                            <td>线性关系</td>
+                            <td>线性回归/Ridge</td>
+                            <td>可解释性强</td>
+                        </tr>
+                        <tr>
+                            <td>回归</td>
+                            <td>非线性</td>
+                            <td>梯度提升树</td>
+                            <td>拟合复杂模式</td>
+                        </tr>
+                        <tr>
+                            <td>聚类</td>
+                            <td>球形簇</td>
+                            <td>K-Means</td>
+                            <td>快速、易实现</td>
+                        </tr>
+                        <tr>
+                            <td>降维</td>
+                            <td>高维数据</td>
+                            <td>PCA/t-SNE</td>
+                            <td>PCA 保全局、t-SNE 保局部</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 常见误区 -->
+            <section>
+                <h2>⚠️ 常见误区</h2>
+                <div class="warning-box">
+                    <table class="comparison-table" style="font-size: 0.8em;">
+                        <thead>
+                            <tr>
+                                <th>误区</th>
+                                <th>正确理解</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>"越复杂的算法越好"</td>
+                                <td>奥卡姆剃刀：简单模型在小数据上往往更好</td>
+                            </tr>
+                            <tr>
+                                <td>"集成方法总是最优"</td>
+                                <td>集成需要更多计算资源，实时场景可能不适用</td>
+                            </tr>
+                            <tr>
+                                <td>"标准化可有可无"</td>
+                                <td>SVM、K-Means、PCA 对特征尺度敏感，必须标准化</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 练习题 -->
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：偏差 - 方差权衡</h4>
+                    <p style="font-size: 0.8em;">解释为什么决策树深度过大导致过拟合？如何用交叉验证检测？</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 2：SVM 核选择</h4>
+                    <p style="font-size: 0.8em;">什么时候用线性核？什么时候用 RBF 核？</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 3：聚类评估</h4>
+                    <p style="font-size: 0.8em;">为什么准确率不能用于聚类评估？轮廓系数如何计算？</p>
+                </div>
+                <div class="concept-card" style="margin-top: 0.8em;">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">实现完整的机器学习 pipeline：数据预处理 → 特征选择 → 模型训练 → 交叉验证评估</p>
+                </div>
+            </section>
+
+            <!-- 延伸阅读 -->
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>📘 《统计学习方法》- 李航 (第 1-9 章)</li>
+                    <li>📘 《The Elements of Statistical Learning》- Hastie et al.</li>
+                    <li>🌐 <a href="https://scikit-learn.org/stable/supervised_learning.html" style="color: #3b82f6;">Scikit-learn 机器学习教程</a></li>
+                    <li>🌐 <a href="https://xgboost.readthedocs.io/" style="color: #3b82f6;">XGBoost 官方文档</a></li>
+                </ul>
+            </section>
+
+            <!-- 结束页 -->
+            <section>
+                <h2>🎉 完成本节学习！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>1.3 深度学习基础</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="1-3-deep-learning.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b; margin-right: 1em;">← 返回导航</a>
+                        <a href="../../docs/chapter-1/1-2-ml-algorithms.md" style="color: #64748b;">查看文档</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="1-1-math-basics.html">← 数学基础</a> |
+        <a href="1-3-deep-learning.html">深度学习 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            showSlideNumber: 'all',
+            controls: true,
+            progress: true,
+            center: true,
+            transition: 'slide',
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+    </script>
+</body>
+</html>

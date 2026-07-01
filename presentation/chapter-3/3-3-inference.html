@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.3 推理优化技术 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>⚡ 推理优化技术</h1>
+                <h4>AI 能力图谱 · 第 3 章第 3 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>vLLM · TensorRT · KV Cache · 连续批处理</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 LLM 推理的瓶颈与优化方向</li>
+                        <li>✅ 掌握 KV Cache 机制与显存优化</li>
+                        <li>✅ 运用 vLLM、TensorRT-LLM 加速推理</li>
+                        <li>✅ 实现连续批处理与动态调度</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>LLM 推理瓶颈分析</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>计算瓶颈</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>Attention O(n²) 复杂度</li>
+                            <li>FFN 大矩阵乘法</li>
+                            <li>显存带宽限制</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>内存瓶颈</h4>
+                        <ul style="font-size: 0.75em;">
+                            <li>模型权重占用</li>
+                            <li>KV Cache 增长</li>
+                            <li>批次数据显存</li>
+                        </ul>
+                    </div>
+                </div>
+                <pre style="font-size: 0.7em;"><code>推理显存分解 (以 70B 模型为例):
+├── 权重：140GB (FP16)
+├── KV Cache: 可变，约 20-40GB
+├── 激活值：5-10GB
+└── 总需求：~200GB
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>KV Cache 机制</h2>
+                <div class="highlight-box">
+                    <p><strong>核心思想</strong>：缓存已计算过的 K、V，避免重复计算</p>
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>Without Cache</h4>
+                        <pre style="font-size: 0.6em;"><code>每生成一个 token:
+  重新计算所有位置
+  的 Q, K, V
+
+计算量：O(n²)
+                        </code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>With Cache</h4>
+                        <pre style="font-size: 0.6em;"><code>每生成一个 token:
+  只计算新位置的 Q,K,V
+  复用历史 KV Cache
+
+计算量：O(n)
+                        </code></pre>
+                    </div>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+# KV Cache 显存估算
+# 每层每 token 的 KV 缓存
+cache_per_token = 2 * hidden_size * num_layers * 2  # K 和 V, FP16
+
+# Llama-2-7B: hidden=4096, layers=32
+# 单 token 缓存 = 2 * 4096 * 32 * 2 * 2 bytes ≈ 1MB
+# 1024 长度序列 ≈ 1GB KV Cache
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>PagedAttention - vLLM 核心技术</h2>
+                <div class="highlight-box">
+                    <p>受操作系统虚拟内存启发，解决 KV Cache 碎片化问题</p>
+                </div>
+                <div class="architecture-diagram" style="background:rgba(255,255,255,0.03); padding:1em; border-radius:8px; font-size:0.65em;">
+                    <pre>
+传统方式:
+  [请求 1:███████][请求 2:████][请求 3:████████]
+  → 内存碎片化，无法高效利用
+
+PagedAttention:
+  请求 1: [页 0][页 3][页 1]
+  请求 2: [页 2][页 5]
+  请求 3: [页 4][页 6][页 7][页 0]
+  → 非连续存储，按需分配
+                    </pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>vLLM 使用示例</h2>
+                <pre><code class="python" data-trim data-noescape>
+from vllm import LLM, SamplingParams
+
+# 创建 LLM 实例
+llm = LLM(
+    model="meta-llama/Llama-2-7b-chat-hf",
+    tensor_parallel_size=1,      # GPU 数量
+    gpu_memory_utilization=0.9,  # GPU 显存利用率
+    max_num_seqs=256,            # 最大并发序列数
+    max_model_len=4096           # 最大序列长度
+)
+
+# 采样配置
+sampling_params = SamplingParams(
+    temperature=0.7,
+    top_p=0.9,
+    max_tokens=512,
+    stop=["</s>", "User:"]
+)
+
+# 批量推理
+prompts = ["Hello:", "What is AI?", "Explain quantum"]
+outputs = llm.generate(prompts, sampling_params)
+
+for output in outputs:
+    print(output.outputs[0].text)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>连续批处理 (Continuous Batching)</h2>
+                <div class="highlight-box">
+                    <p>传统批处理：等待整个 batch 完成；连续批处理：动态插入新请求</p>
+                </div>
+                <div style="font-size:0.7em; background:rgba(255,255,255,0.03); padding:1em; border-radius:8px;">
+                    <pre>
+传统批处理:
+  Step1: [A1][B1][C1][D1]
+  Step2: [A2][B2][C2][D2]
+  Step3: [A3][B3][C3][D3]  ← C、D 已完成但空闲等待
+
+连续批处理:
+  Step1: [A1][B1][C1][D1]
+  Step2: [A2][B2][C2]      ← C 完成，立即插入 E
+  Step3: [A3][B3][E1]      ← A 完成，插入 F
+                    </pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>TensorRT-LLM 优化</h2>
+                <pre><code class="python" data-trim data-noescape>
+import tensorrt_llm
+from tensorrt_llm import Functionality
+
+# 1. 构建优化引擎
+builder = tensorrt_llm.Builder()
+
+# 2. 配置优化选项
+config = {
+    "use_cuda_graph": True,      # CUDA 图
+    "use_paged_attention": True, # PagedAttention
+    "reduce_fusion": True,       # 算子融合
+    "gemm_plugin": "auto"        # GEMM 插件
+}
+
+# 3. 导出引擎
+engine = builder.build(
+    model,
+    config,
+    max_batch_size=32,
+    max_input_len=2048,
+    max_output_len=512
+)
+
+# 4. 保存与部署
+engine.save("llama-7b.engine")
+                </code></pre>
+                <div class="highlight-box">
+                    <p><strong>性能提升</strong>：相比 PyTorch 原生推理，TensorRT-LLM 可提升 3-5 倍</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>推理优化技术对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>技术</th>
+                            <th>延迟</th>
+                            <th>吞吐量</th>
+                            <th>显存效率</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>FP16 Baseline</strong></td>
+                            <td>基准</td>
+                            <td>基准</td>
+                            <td>基准</td>
+                            <td>开发调试</td>
+                        </tr>
+                        <tr>
+                            <td><strong>INT8</strong></td>
+                            <td>+20%</td>
+                            <td>+50%</td>
+                            <td>+50%</td>
+                            <td>生产部署</td>
+                        </tr>
+                        <tr>
+                            <td><strong>vLLM</strong></td>
+                            <td>+30%</td>
+                            <td>+150%</td>
+                            <td>+80%</td>
+                            <td>高并发</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TensorRT-LLM</strong></td>
+                            <td>+50%</td>
+                            <td>+300%</td>
+                            <td>+60%</td>
+                            <td>极致性能</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：KV Cache 估算</h4>
+                    <p style="font-size: 0.8em;">计算 Llama-2-70B 在 sequence_length=2048, batch_size=32 时的 KV Cache 显存需求。</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 2：PagedAttention</h4>
+                    <p style="font-size: 0.8em;">PagedAttention 相比传统 Attention 的优势是什么？</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/2309.06180" style="color: #3b82f6;">vLLM: Easy, Fast, and Cheap LLM Serving</a></li>
+                    <li>🌐 <a href="https://github.com/NVIDIA/TensorRT-LLM" style="color: #3b82f6;">TensorRT-LLM GitHub</a></li>
+                    <li>🌐 <a href="https://github.com/ggerganov/llama.cpp" style="color: #3b82f6;">llama.cpp - CPU 推理</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>3.4 训练数据处理</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="3-4-data-processing.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="3-2-compression.html">← 压缩与量化</a> |
+        <a href="3-4-data-processing.html">数据处理 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

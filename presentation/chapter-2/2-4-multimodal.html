@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.4 多模态大模型技术 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .warning-box { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .formula { font-size: 1.2em; text-align: center; padding: 0.5em; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 0.5em 0; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🖼️ 多模态大模型技术</h1>
+                <h4>AI 能力图谱 · 第 2 章第 4 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>CLIP · LLaVA · 视觉 - 语言模型</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解对比学习在 multimodal 中的应用</li>
+                        <li>✅ 掌握 CLIP 模型的架构与训练方法</li>
+                        <li>✅ 理解 LLaVA 等多模态对话模型</li>
+                        <li>✅ 能够构建简单的图文问答应用</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>CLIP 核心架构</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>双层塔架构</h4>
+                        <pre style="font-size: 0.65em;"><code>    图像 Encoder      文本 Encoder
+         │                │
+         ▼                ▼
+    图像特征向量    文本特征向量
+         │                │
+         └──────┬─────────┘
+                ▼
+        对比学习损失
+                        </code></pre>
+                    </div>
+                    <div class="concept-card">
+                        <h4>对比学习损失</h4>
+                        <div class="formula" style="font-size: 0.8em;">
+                            $$\mathcal{L} = -\frac{1}{2}\left(\log\frac{e^{sim(I,T)/\tau}}{\sum e^{sim(I,T_j)/\tau}} + \log\frac{e^{sim(I,T)/\tau}}{\sum e^{sim(I_j,T)/\tau}}\right)$$
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>CLIP 代码实现</h2>
+                <pre><code class="python" data-trim data-noescape>
+import torch
+import torch.nn as nn
+from transformers import CLIPProcessor, CLIPModel
+
+# 加载预训练 CLIP
+model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+
+# 图文匹配示例
+from PIL import Image
+import requests
+
+image = Image.open(requests.get("https://example.com/image.jpg", stream=True).raw)
+text = "一只猫坐在沙发上"
+
+inputs = processor(
+    text=[text],
+    images=image,
+    return_tensors="pt",
+    padding=True
+)
+
+outputs = model(**inputs)
+similarity = outputs.logits_per_image  # 图文相似度
+
+print(f"图文匹配分数：{similarity.item():.4f}")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>LLaVA - 多模态对话模型</h2>
+                <div class="highlight-box">
+                    <p><strong>核心思想</strong>：用 CLIP 视觉 Encoder + LLM，通过投影层连接</p>
+                </div>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>架构组件</h4>
+                        <ul style="font-size: 0.7em;">
+                            <li>视觉 Encoder: CLIP ViT-L/14</li>
+                            <li>语言模型：Vicuna/Llama</li>
+                            <li>投影层：2 层 MLP</li>
+                        </ul>
+                    </div>
+                    <div class="concept-card">
+                        <h4>训练流程</h4>
+                        <ol style="font-size: 0.65em;">
+                            <li>预训练：投影层对齐</li>
+                            <li>微调：端到端指令微调</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>LLaVA 实现详解</h2>
+                <pre><code class="python" data-trim data-noescape>
+class LLaVAModel(nn.Module):
+    def __init__(self, vision_model, llm_model, hidden_size=4096):
+        super().__init__()
+        self.vision_encoder = vision_model
+        self.llm = llm_model
+
+        # 视觉 - 语言投影层
+        self.projector = nn.Sequential(
+            nn.Linear(vision_hidden, hidden_size),
+            nn.GELU(),
+            nn.Linear(hidden_size, hidden_size)
+        )
+
+    def forward(self, input_ids, images, attention_mask):
+        # 提取图像特征
+        with torch.no_grad():
+            vision_outputs = self.vision_encoder(images)
+            image_features = vision_outputs.pooler_output
+
+        # 投影到语言空间
+        projected = self.projector(image_features)
+
+        # 拼接文本和图像特征
+        inputs_embeds = self.llm.embed_tokens(input_ids)
+        # 将图像特征插入到文本序列前
+        combined = torch.cat([projected.unsqueeze(1), inputs_embeds], dim=1)
+
+        return self.llm(inputs_embeds=combined)
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>多模态模型对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>模型</th>
+                            <th>视觉 Encoder</th>
+                            <th>语言模型</th>
+                            <th>训练方式</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>CLIP</strong></td>
+                            <td>ViT-B/32</td>
+                            <td>Transformer</td>
+                            <td>对比学习</td>
+                            <td>图文检索</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LLaVA</strong></td>
+                            <td>CLIP ViT-L</td>
+                            <td>Vicuna-13B</td>
+                            <td>指令微调</td>
+                            <td>视觉对话</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GPT-4V</strong></td>
+                            <td>专有</td>
+                            <td>GPT-4</td>
+                            <td>黑盒</td>
+                            <td>通用多模态</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flamingo</strong></td>
+                            <td>ViT</td>
+                            <td>Chinchilla</td>
+                            <td>交叉注意力</td>
+                            <td>少样本学习</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：CLIP 零样本分类</h4>
+                    <p style="font-size: 0.8em;">如何用 CLIP 实现零样本图像分类？</p>
+                    <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">提示：将类别名转为文本 prompt，计算与图像的最大相似度</p>
+                </div>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">用 CLIP 实现一个以图搜图系统</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/2103.00020" style="color: #3b82f6;">CLIP: Connecting Images and Text</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2304.08485" style="color: #3b82f6;">LLaVA: Large Language and Vision Assistant</a></li>
+                    <li>🌐 <a href="https://github.com/haotian-liu/LLaVA" style="color: #3b82f6;">LLaVA 官方代码</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成第 2 章学习！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>恭喜完成 <strong>大模型核心技术</strong> 全部学习！</p>
+                    <p style="margin-top: 1em;">下一章：<strong>第 3 章 大模型工程化</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="2-3-peft.html">← PEFT</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+    </script>
+</body>
+</html>

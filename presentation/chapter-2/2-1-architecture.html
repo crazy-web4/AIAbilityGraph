@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.1 大模型架构设计 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .warning-box { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .formula { font-size: 1.2em; text-align: center; padding: 0.5em; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 0.5em 0; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+        .architecture-diagram { background: rgba(255,255,255,0.03); padding: 1em; border-radius: 8px; font-family: monospace; font-size: 0.65em; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- 封面 -->
+            <section>
+                <h1>🏗️ 大模型架构设计</h1>
+                <h4>AI 能力图谱 · 第 2 章第 1 节</h4>
+                <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+                    <p>Transformer · BERT · GPT · Llama</p>
+                    <p style="margin-top: 1em;">从原始 Transformer 到现代大语言模型</p>
+                </div>
+            </section>
+
+            <!-- 学习目标 -->
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <p style="font-size: 0.9em;">学完本节后，你将能够：</p>
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 Transformer 架构的核心组件与注意力机制</li>
+                        <li>✅ 对比 Encoder-only、Decoder-only、Encoder-Decoder 架构</li>
+                        <li>✅ 掌握现代大模型的关键优化技术（RoPE、RMSNorm、SwiGLU）</li>
+                        <li>✅ 根据任务需求选择合适的模型架构</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Transformer 回顾 -->
+            <section>
+                <h2>2.1.1 Transformer 架构回顾</h2>
+                <div class="architecture-diagram">
+                    <pre>
+                    Transformer
+                         │
+        ┌────────────────┴───────────────┐
+        │                                │
+    Encoder (BERT)                   Decoder (GPT)
+        │                                │
+   ┌────┴────┐                      ┌────┴────┐
+   │         │                      │         │
+Multi-Head   Feed               Multi-Head  Feed
+Self-Attn    Forward             Self-Attn   Forward
+                    </pre>
+                </div>
+                <div class="formula">
+                    $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+                </div>
+            </section>
+
+            <!-- 三种架构范式 -->
+            <section>
+                <h2>2.1.2 三种架构范式对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>架构类型</th>
+                            <th>代表模型</th>
+                            <th>注意力类型</th>
+                            <th>适用场景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Encoder-only</strong></td>
+                            <td>BERT, RoBERTa</td>
+                            <td>双向自注意力</td>
+                            <td>理解任务（分类、NER）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Decoder-only</strong></td>
+                            <td>GPT, Llama</td>
+                            <td>因果/单向注意力</td>
+                            <td>生成任务（文本生成）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Encoder-Decoder</strong></td>
+                            <td>T5, BART</td>
+                            <td>双向 + 交叉注意力</td>
+                            <td>序列到序列（翻译、摘要）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- BERT 架构 -->
+            <section>
+                <h3>1. Encoder-only (BERT 风格)</h3>
+                <div class="highlight-box">
+                    <p><strong>特点</strong>：双向自注意力，可以看到所有位置</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+class BERTStyleEncoder(nn.Module):
+    def __init__(self, vocab_size, d_model=768,
+                 n_heads=12, n_layers=12):
+        super().__init__()
+        self.embeddings = nn.Embedding(vocab_size, d_model)
+        self.encoder_layers = nn.ModuleList([
+            TransformerEncoderLayer(d_model, n_heads)
+            for _ in range(n_layers)
+        ])
+        # [CLS] token 用于分类
+        self.cls_token = nn.Parameter(torch.randn(1, 1, d_model))
+
+    def forward(self, input_ids, attention_mask=None):
+        x = self.embeddings(input_ids)
+        # 添加 CLS token
+        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
+        x = torch.cat([cls_tokens, x], dim=1)
+        # 编码
+        for layer in self.encoder_layers:
+            x = layer(x, attention_mask)
+        return x[:, 0, :]  # CLS token 表示
+                </code></pre>
+            </section>
+
+            <!-- GPT 架构 -->
+            <section>
+                <h3>2. Decoder-only (GPT 风格)</h3>
+                <div class="highlight-box">
+                    <p><strong>特点</strong>：因果掩码，只能看到过去和当前位置</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+class GPTStyleDecoder(nn.Module):
+    def __init__(self, vocab_size, d_model=768,
+                 n_heads=12, n_layers=12):
+        super().__init__()
+        self.token_embeddings = nn.Embedding(vocab_size, d_model)
+        self.decoder_layers = nn.ModuleList([
+            TransformerDecoderLayer(d_model, n_heads)
+            for _ in range(n_layers)
+        ])
+        # 因果掩码
+        self.register_buffer('causal_mask',
+            torch.tril(torch.ones(max_seq_len, max_seq_len)))
+
+    def forward(self, input_ids):
+        x = self.token_embeddings(input_ids)
+        # 因果掩码防止看未来
+        for layer in self.decoder_layers:
+            x = layer(x, self.causal_mask)
+        return self.output_head(x)
+                </code></pre>
+            </section>
+
+            <!-- 现代大模型技术 -->
+            <section>
+                <h2>2.1.3 现代大模型关键技术</h2>
+                <div class="two-column">
+                    <div class="concept-card">
+                        <h4>🔄 RoPE 旋转位置编码</h4>
+                        <p style="font-size: 0.75em;">更好的外推性</p>
+                    </div>
+                    <div class="concept-card">
+                        <h4>⚖️ RMSNorm</h4>
+                        <p style="font-size: 0.75em;">更稳定、更快</p>
+                    </div>
+                </div>
+                <div class="concept-card" style="margin-top: 0.8em;">
+                    <h4>🚪 SwiGLU 激活函数</h4>
+                    <p style="font-size: 0.75em;">比 ReLU、GELU 更好的性能</p>
+                </div>
+            </section>
+
+            <!-- RoPE -->
+            <section>
+                <h3>RoPE 旋转位置编码</h3>
+                <div class="formula">
+                    $$q \circledast \text{RoPE}(m) \cdot k \circledast \text{RoPE}(n) = f(q, k, m-n)$$
+                </div>
+                <div class="highlight-box">
+                    <p>只依赖相对位置 m-n，外推性更好</p>
+                </div>
+                <pre><code class="python" data-trim data-noescape>
+class RotaryEmbedding(nn.Module):
+    def __init__(self, dim, base=10000):
+        super().__init__()
+        inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2).float() / dim))
+        self.register_buffer('inv_freq', inv_freq)
+
+    def forward(self, x):
+        t = torch.arange(len(x), device=x.device).type_as(self.inv_freq)
+        freqs = torch.einsum('i,j->ij', t, self.inv_freq)
+        emb = torch.cat((freqs, freqs), dim=-1)
+        return emb.cos(), emb.sin()
+
+def apply_rotary_pos_emb(q, k, cos, sin):
+    def rotate_half(x):
+        x1, x2 = x[..., :x.shape[-1]//2], x[..., x.shape[-1]//2:]
+        return torch.cat((-x2, x1), dim=-1)
+    q_embed = (q * cos) + (rotate_half(q) * sin)
+    k_embed = (k * cos) + (rotate_half(k) * sin)
+    return q_embed, k_embed
+                </code></pre>
+            </section>
+
+            <!-- RMSNorm -->
+            <section>
+                <h3>RMSNorm vs LayerNorm</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>LayerNorm</th>
+                            <th>RMSNorm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>公式</td>
+                            <td>$\frac{x-\mu}{\sigma} \cdot \gamma + \beta$</td>
+                            <td>$\frac{x}{\text{rms}(x)} \cdot \gamma$</td>
+                        </tr>
+                        <tr>
+                            <td>计算</td>
+                            <td>减均值 + 除标准差</td>
+                            <td>只除 RMS</td>
+                        </tr>
+                        <tr>
+                            <td>速度</td>
+                            <td>基准</td>
+                            <td>快 7-10%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre><code class="python" data-trim data-noescape>
+class RMSNorm(nn.Module):
+    def __init__(self, dim, eps=1e-6):
+        super().__init__()
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(dim))
+
+    def forward(self, x):
+        # 计算 RMS
+        rms = torch.sqrt(torch.mean(x ** 2, dim=-1, keepdim=True) + self.eps)
+        # 归一化
+        return self.weight * (x / rms)
+                </code></pre>
+            </section>
+
+            <!-- Llama 架构 -->
+            <section>
+                <h2>2.1.4 Llama 架构详解</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>模型</th>
+                            <th>层数</th>
+                            <th>注意力头数</th>
+                            <th>KV 头数</th>
+                            <th>隐藏维度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Llama 2 7B</td>
+                            <td>32</td>
+                            <td>32</td>
+                            <td>32</td>
+                            <td>4096</td>
+                        </tr>
+                        <tr>
+                            <td>Llama 2 13B</td>
+                            <td>40</td>
+                            <td>40</td>
+                            <td>40</td>
+                            <td>5120</td>
+                        </tr>
+                        <tr>
+                            <td>Llama 2 70B</td>
+                            <td>80</td>
+                            <td>64</td>
+                            <td>8</td>
+                            <td>8192</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="highlight-box">
+                    <p><strong>GQA (Grouped Query Attention)</strong>：70B 模型使用 8 个 KV 头服务 64 个查询头，减少 8 倍 KV Cache</p>
+                </div>
+            </section>
+
+            <!-- 架构对比总结 -->
+            <section>
+                <h2>📊 架构对比总结</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>BERT</th>
+                            <th>GPT</th>
+                            <th>Llama</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>架构类型</strong></td>
+                            <td>Encoder-only</td>
+                            <td>Decoder-only</td>
+                            <td>Decoder-only</td>
+                        </tr>
+                        <tr>
+                            <td><strong>注意力</strong></td>
+                            <td>双向</td>
+                            <td>因果单向</td>
+                            <td>因果单向 + GQA</td>
+                        </tr>
+                        <tr>
+                            <td><strong>位置编码</strong></td>
+                            <td>学习型</td>
+                            <td>学习型</td>
+                            <td>RoPE</td>
+                        </tr>
+                        <tr>
+                            <td><strong>归一化</strong></td>
+                            <td>LayerNorm (Post)</td>
+                            <td>LayerNorm (Pre)</td>
+                            <td>RMSNorm (Pre)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>激活函数</strong></td>
+                            <td>GELU</td>
+                            <td>GELU</td>
+                            <td>SwiGLU</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 练习题 -->
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：注意力计算</h4>
+                    <p style="font-size: 0.8em;">给定 Q, K, V 维度为 (batch=8, heads=12, seq_len=512, d_k=64)，计算自注意力的输出维度和计算复杂度。</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 2：RoPE 推导</h4>
+                    <p style="font-size: 0.8em;">证明 RoPE 的点积结果只依赖相对位置 m-n。</p>
+                </div>
+                <div class="concept-card">
+                    <h4>基础题 3：GQA 分析</h4>
+                    <p style="font-size: 0.8em;">当 num_heads=32, num_kv_heads=8 时，相比 MHA 减少多少 KV Cache 内存？</p>
+                    <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">答案：减少 4 倍（32/8=4）</p>
+                </div>
+            </section>
+
+            <!-- 延伸阅读 -->
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://arxiv.org/abs/1706.03762" style="color: #3b82f6;">Attention Is All You Need</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2307.09288" style="color: #3b82f6;">Llama 2: Open Foundation and Fine-Tuned Chat Models</a></li>
+                    <li>🌐 <a href="https://arxiv.org/abs/2104.09864" style="color: #3b82f6;">RoFormer: Enhanced Transformer with Rotary Position Embedding</a></li>
+                    <li>🌐 <a href="https://jalammar.github.io/illustrated-transformer/" style="color: #3b82f6;">The Illustrated Transformer - Jay Alammar</a></li>
+                </ul>
+            </section>
+
+            <!-- 结束页 -->
+            <section>
+                <h2>🎉 完成本节学习！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>2.2 预训练与微调技术</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="2-2-pretraining.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b; margin-right: 1em;">← 返回导航</a>
+                        <a href="../../docs/chapter-2/2-1-architecture.md" style="color: #64748b;">查看文档</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="2-2-pretraining.html">预训练与微调 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            showSlideNumber: 'all',
+            controls: true,
+            progress: true,
+            center: true,
+            transition: 'slide',
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+    </script>
+</body>
+</html>

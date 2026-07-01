@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.5 MLOps 与模型持续交付 - AI 能力图谱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 90%; margin: 0 auto; }
+        .reveal pre code { max-height: 350px; font-size: 13px; }
+        .reveal .slides section { text-align: left; }
+        .highlight-box { background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 0.8em 1.2em; margin: 0.8em 0; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+        .comparison-table { font-size: 0.55em; border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.4em; text-align: left; }
+        .comparison-table th { background: rgba(59, 130, 246, 0.3); }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; margin: 0.8em 0; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .nav-footer { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0.6; }
+        .nav-footer a { color: #3b82f6; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>🔄 MLOps 与模型持续交付</h1>
+                <h4>AI 能力图谱 · 第 3 章第 5 节</h4>
+            </section>
+
+            <section>
+                <h2>🎯 学习目标</h2>
+                <div class="highlight-box">
+                    <ul style="font-size: 0.85em;">
+                        <li>✅ 理解 MLOps 的核心流程与工具链</li>
+                        <li>✅ 掌握模型版本管理方法</li>
+                        <li>✅ 实现 CI/CD for ML</li>
+                        <li>✅ 构建模型监控与告警系统</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>MLOps 核心流程</h2>
+                <div class="architecture-diagram" style="background:rgba(255,255,255,0.03); padding:1em; border-radius:8px; font-size:0.6em;">
+                    <pre>
+┌─────────────────────────────────────────────────────────────┐
+│                     MLOps Pipeline                          │
+├─────────────────────────────────────────────────────────────┤
+│  数据 → 训练 → 评估 → 注册 → 部署 → 监控 → 再训练           │
+│   │      │      │      │      │      │       │             │
+│   ▼      ▼      ▼      ▼      ▼      ▼       ▼             │
+│  DVC   MLFlow  CI    Model  CD    A/B    Drift            │
+│        Experiment Registry        Test   Detection         │
+└─────────────────────────────────────────────────────────────┘
+                    </pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>模型版本管理</h2>
+                <pre><code class="python" data-trim data-noescape>
+# MLflow 模型注册
+import mlflow
+import mlflow.sklearn
+
+mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_experiment("llm-finetuning")
+
+with mlflow.start_run():
+    # 记录参数
+    mlflow.log_params({
+        "model": "llama-2-7b",
+        "lr": 2e-5,
+        "epochs": 3
+    })
+
+    # 记录指标
+    mlflow.log_metrics({
+        "loss": 0.123,
+        "accuracy": 0.95
+    })
+
+    # 注册模型
+    mlflow.sklearn.log_model(model, "model")
+    model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
+
+    # 推送到 Registry
+    mlflow.register_model(model_uri, "llm-chat-v1")
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>CI/CD for ML</h2>
+                <pre><code class="yaml" data-trim data-noescape>
+# .github/workflows/ml-pipeline.yml
+name: ML Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Unit Tests
+        run: pytest tests/
+
+      - name: Data Validation
+        run: python scripts/validate_data.py
+
+      - name: Train Model
+        run: python train.py
+
+      - name: Evaluate Model
+        run: python evaluate.py
+
+      - name: Deploy if metrics OK
+        if: ${{ steps.evaluate.outputs.accuracy > 0.9 }}
+        run: ./deploy.sh
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>模型监控</h2>
+                <pre><code class="python" data-trim data-noescape>
+# 生产环境监控示例
+from prometheus_client import Counter, Histogram
+import time
+
+# 定义指标
+PREDICTION_COUNT = Counter('predictions_total', 'Total predictions')
+PREDICTION_LATENCY = Histogram('prediction_latency', 'Prediction latency')
+DRIFT_SCORE = Histogram('drift_score', 'Model drift score')
+
+class MonitoredModel:
+    def __init__(self, model, reference_data):
+        self.model = model
+        self.reference_data = reference_data
+
+    def predict(self, X):
+        start = time.time()
+        pred = self.model.predict(X)
+
+        # 记录指标
+        PREDICTION_COUNT.inc()
+        PREDICTION_LATENCY.observe(time.time() - start)
+
+        # 检测漂移
+        drift = compute_drift(X, self.reference_data)
+        DRIFT_SCORE.observe(drift)
+
+        if drift > THRESHOLD:
+            send_alert(f"High drift detected: {drift}")
+
+        return pred
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>📝 练习题</h2>
+                <div class="concept-card">
+                    <h4>基础题 1：MLOps 流程</h4>
+                    <p style="font-size: 0.8em;">解释 MLOps 与传统 DevOps 的区别。</p>
+                </div>
+                <div class="concept-card">
+                    <h4>编程题</h4>
+                    <p style="font-size: 0.8em;">用 MLflow 实现一个完整的模型训练和部署 pipeline。</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📚 延伸阅读</h2>
+                <ul>
+                    <li>🌐 <a href="https://mlflow.org/" style="color: #3b82f6;">MLflow 官方文档</a></li>
+                    <li>🌐 <a href="https://www.kubeflow.org/" style="color: #3b82f6;">Kubeflow - ML on Kubernetes</a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🎉 完成本节！</h2>
+                <div style="text-align: center; margin-top: 2em;">
+                    <p>下一节：<strong>3.6 模型评估与可解释性</strong></p>
+                    <p style="font-size: 0.8em; margin-top: 1em;">
+                        <a href="3-6-evaluation.html" style="color: #3b82f6;">继续学习 →</a>
+                    </p>
+                    <p style="font-size: 0.7em; margin-top: 2em;">
+                        <a href="../index.html" style="color: #64748b;">← 返回导航</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <a href="../index.html">🏠 导航首页</a> |
+        <a href="3-4-data-processing.html">← 数据处理</a> |
+        <a href="3-6-evaluation.html">评估 →</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true, slideNumber: true, showSlideNumber: 'all',
+            controls: true, progress: true, center: true, transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>
