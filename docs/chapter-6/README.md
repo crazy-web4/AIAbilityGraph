@@ -18,6 +18,12 @@
 | 6.3 | 算法工程化 | 模型序列化、服务化 |
 | 6.4 | 系统设计与架构 | 高可用、可扩展架构 |
 
+## 🔍 补充知识点
+
+| 文档 | 内容 |
+|------|------|
+| [6.2 工程化详解](6-2-engineering-keypoints.md) | 代码规范模板、PyTorch 性能优化、重构 Checklist、Trainer 类设计 |
+
 ---
 
 [← 第 5 章：AI 产品与业务](../chapter-5/README.md) | [第 7 章：AI 资源与成本 →](../chapter-7/README.md)

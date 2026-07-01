@@ -22,6 +22,23 @@
 
 ---
 
+## 🔍 细化知识点
+
+针对核心章节的关键知识点，创建了详细的补充文档：
+
+| 章节 | 补充文档 |
+|------|---------|
+| **第 2 章** | [架构设计](docs/chapter-2/2-1-architecture-keypoints.md) · [预训练](docs/chapter-2/2-2-pretraining-keypoints.md) · [多模态](docs/chapter-2/2-4-multimodal-keypoints.md) |
+| **第 3 章** | [分布式训练](docs/chapter-3/3-1-distributed-keypoints.md) |
+| **第 4 章** | [提示词工程](docs/chapter-4/4-2-prompt-engineering-keypoints.md) · [RAG](docs/chapter-4/4-3-rag-keypoints.md) |
+| **第 5 章** | [需求分析](docs/chapter-5/5-1-requirements-keypoints.md) |
+| **第 6 章** | [工程化](docs/chapter-6/6-2-engineering-keypoints.md) |
+| **第 7 章** | [资源规划](docs/chapter-7/7-1-resources-keypoints.md) |
+
+📌 完整索引：[知识点详解总目录](docs/KEYPOINTS-INDEX.md)
+
+---
+
 ## 📖 项目概述
 
 本教程旨在创建一份系统化的 AI 能力图谱，覆盖从基础数学知识到大模型应用开发的全栈能力体系。

@@ -28,6 +28,13 @@
 - RESTful API 基础
 - 第 1-3 章内容
 
+## 🔍 补充知识点
+
+| 文档 | 内容 |
+|------|------|
+| [4.2 提示词工程详解](4-2-prompt-engineering-keypoints.md) | 提示词模式库、CoT/Few-shot/ReAct 实现、示例选择器 |
+| [4.3 RAG 详解](4-3-rag-keypoints.md) | 向量数据库对比、HyDE 检索、Cross-Encoder 重排序、完整 RAG 系统 |
+
 ---
 
 [← 第 3 章：大模型工程化](../chapter-3/README.md) | [第 5 章：AI 产品与业务 →](../chapter-5/README.md)

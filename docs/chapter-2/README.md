@@ -32,6 +32,14 @@
 - 🤗 HuggingFace Transformers 库
 - 📊 预训练模型：HuggingFace Model Hub
 
+## 🔍 补充知识点
+
+| 文档 | 内容 |
+|------|------|
+| [2.1 架构设计详解](2-1-architecture-keypoints.md) | Transformer 变体对比、RoPE/RMSNorm/SwiGLU 实现、架构选择决策树 |
+| [2.2 预训练详解](2-2-pretraining-keypoints.md) | 数据清洗管道、DeepSpeed 训练配置、故障排查指南 |
+| [2.4 多模态详解](2-4-multimodal-keypoints.md) | CLIP 实现、LLaVA 微调、图文检索系统 |
+
 ---
 
 [← 第 1 章：AI 基础理论](../chapter-1/README.md) | [第 3 章：大模型工程化 →](../chapter-3/README.md)

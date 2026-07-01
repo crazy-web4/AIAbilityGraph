@@ -28,6 +28,12 @@
 - PyTorch 分布式基础
 - Linux/GPU 集群基础
 
+## 🔍 补充知识点
+
+| 文档 | 内容 |
+|------|------|
+| [3.1 分布式训练详解](3-1-distributed-keypoints.md) | 并行策略决策树、ZeRO 配置详解、显存计算器、NCCL 优化 |
+
 ---
 
 [← 第 2 章：大模型核心技术](../chapter-2/README.md) | [第 4 章：大模型应用开发 →](../chapter-4/README.md)
