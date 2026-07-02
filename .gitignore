@@ -1,0 +1,10 @@
+# Hook logs (may contain sensitive data)
+.claude/hooks/logs/
+
+# Backups (can contain sensitive configs)
+.claude/backups/
+
+# OS files
+.DS_Store
+*.swp
+*.swo
