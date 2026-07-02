@@ -8,10 +8,10 @@
 
 | 章节 | 补充文档数量 | 核心主题 |
 |------|-------------|---------|
-| 第 1 章 | 待补充 | 数学基础、机器学习、深度学习 |
-| 第 2 章 | ✅ 3 篇 | 大模型架构、预训练、多模态 |
-| 第 3 章 | ✅ 1 篇 | 分布式训练、工程化 |
-| 第 4 章 | ✅ 2 篇 | 提示词工程、RAG |
+| 第 1 章 | ✅ 3 篇 | 数学基础、机器学习、深度学习 |
+| 第 2 章 | ✅ 4 篇 | 大模型架构、预训练、PEFT、多模态 |
+| 第 3 章 | ✅ 2 篇 | 分布式训练、模型压缩 |
+| 第 4 章 | ✅ 3 篇 | 提示词工程、RAG、Agent |
 | 第 5 章 | ✅ 1 篇 | 需求分析、项目管理 |
 | 第 6 章 | ✅ 1 篇 | 工程化、代码规范 |
 | 第 7 章 | ✅ 1 篇 | 资源规划、成本估算 |
@@ -20,12 +20,23 @@
 
 ## 🔍 详细索引
 
+### 第 1 章：AI 基础理论
+
+| 文档 | 核心内容 | 代码示例 |
+|------|---------|---------|
+| [1.1 数学基础知识点](chapter-1/1-1-math-keypoints.md) | • 线性代数应用 (PCA/SVD)<br>• 概率分布速查表<br>• 贝叶斯优化实战 | • 特征值分解示例<br>• 贝叶斯优化代码 |
+| [1.2 机器学习知识点](chapter-1/1-2-ml-keypoints.md) | • 监督学习算法对比<br>• XGBoost 实战<br>• K-Means 聚类<br>• 评估指标可视化 | • XGBoost 完整流程<br>• K-Means 聚类分析<br>• 分类评估可视化 |
+| [1.3 深度学习知识点](chapter-1/1-3-dl-keypoints.md) | • 激活函数对比<br>• 优化器选择<br>• 训练技巧模板 | • 激活函数可视化<br>• 梯度流动测试<br>• 优化器对比实验 |
+
+---
+
 ### 第 2 章：大模型核心技术
 
 | 文档 | 核心内容 | 代码示例 |
 |------|---------|---------|
 | [2.1 架构设计知识点](chapter-2/2-1-architecture-keypoints.md) | • Transformer 架构变体对比<br>• RoPE/RMSNorm/SwiGLU 详解<br>• 架构选择决策树 | • 三种架构实现对比<br>• RoPE 代码实现<br>• SwiGLU vs ReLU 对比 |
 | [2.2 预训练知识点](chapter-2/2-2-pretraining-keypoints.md) | • 数据准备清单<br>• 分布式训练配置<br>• 故障排查指南 | • 数据清洗管道<br>• DeepSpeed 训练脚本<br>• Loss 监控脚本 |
+| [2.3 PEFT 知识点](chapter-2/2-3-peft-keypoints.md) | • LoRA/QLoRA/P-Tuning详解<br>• PEFT方法选择指南<br>• 4bit 量化微调 | • LoRA 完整实现<br>• QLoRA 微调脚本<br>• P-Tuning v2 实现 |
 | [2.4 多模态知识点](chapter-2/2-4-multimodal-keypoints.md) | • CLIP/LLaVA 架构解析<br>• 多模态对齐技术<br>• 零样本分类 | • CLIP 实现<br>• LLaVA 微调代码<br>• 图文检索系统 |
 
 ---
@@ -35,6 +46,7 @@
 | 文档 | 核心内容 | 代码示例 |
 |------|---------|---------|
 | [3.1 分布式训练知识点](chapter-3/3-1-distributed-keypoints.md) | • 并行策略决策树<br>• ZeRO 配置详解<br>• 显存需求计算器<br>• 通信优化技术 | • DeepSpeed ZeRO-3 配置<br>• 显存计算工具<br>• NCCL 优化参数 |
+| [3.2 模型压缩知识点](chapter-3/3-2-compression-keypoints.md) | • 剪枝/蒸馏/量化对比<br>• 结构化 vs 非结构化剪枝<br>• 知识蒸馏实战 | • 幅值剪枝实现<br>• 蒸馏训练器<br>• 迭代剪枝流程 |
 
 ---
 
@@ -44,6 +56,7 @@
 |------|---------|---------|
 | [4.2 提示词工程知识点](chapter-4/4-2-prompt-engineering-keypoints.md) | • 提示词模式库<br>• CoT/Few-shot/HyDE详解<br>• ReAct 模式实现 | • Chain-of-Thought 生成器<br>• Few-shot 示例选择器<br>• ReAct Agent 实现 |
 | [4.3 RAG 知识点](chapter-4/4-3-rag-keypoints.md) | • RAG 架构选择器<br>• 向量数据库对比<br>• 检索优化技巧<br>• 重排序实现 | • Chroma 快速入门<br>• HyDE 检索实现<br>• Cross-Encoder 重排序<br>• 完整 RAG 系统 |
+| [4.4 Agent 知识点](chapter-4/4-4-agent-keypoints.md) | • Function Calling详解<br>• ReAct Agent实现<br>• 多 Agent 协作 | • 工具注册系统<br>• ReAct 循环实现<br>• CrewAI示例 |
 
 ---
 
