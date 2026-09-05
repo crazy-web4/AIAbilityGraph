@@ -14,11 +14,22 @@
 | 指标 | 状态 |
 |------|------|
 | **内容完成度** | ✅ 100% |
-| **文档数量** | 51+ 个 |
+| **文档数量** | 54+ 个 |
 | **代码示例** | 65+ 个 |
-| **总字数** | 约 18 万 + |
+| **总字数** | 约 23 万 + |
 
 **🎉 教程内容开发已完成！** 欢迎开始学习和贡献。
+
+---
+
+## 🚀 快速入口
+
+| 资源 | 说明 |
+|------|------|
+| 📖 [**术语表（概念释义大全）**](docs/GLOSSARY.md) | 400+ 核心术语，认证/面试/查漏速查 |
+| 🎓 [**认证备考指南**](docs/certification/README.md) | 阿里云 ACP / AWS AI Practitioner 认证地图与备考方法 |
+| 📝 [**模拟试卷 A（80 题含详解）**](docs/certification/mock-exam-a.md) | 覆盖全部章节的仿真选择题 |
+| 🧭 [**文档总目录**](docs/README.md) | 章节目录、学习路径、配套资源 |
 
 ---
 
@@ -37,6 +48,22 @@
 | **第 7 章** | [资源规划](docs/chapter-7/7-1-resources-keypoints.md) |
 
 📌 完整索引：[知识点详解总目录](docs/KEYPOINTS-INDEX.md) | [最终总结](docs/KEYPOINTS-FINAL-SUMMARY.md)
+
+---
+
+## 🎁 番外篇（Special Topics）
+
+| 编号 | 主题 | 内容 | 难度 |
+|------|------|------|------|
+| Special-01 | **算法工程师打榜** | [打榜指南](docs/special-topics/special-01-benchmark-competition.md) - 从入门到刷榜的完整方法论 | ⭐⭐⭐⭐ |
+| Special-02 | **算法工程师面试** | [面试指南](docs/special-topics/special-02-interview-guide.md) - 从简历到 Offer 的全流程攻略 | ⭐⭐⭐⭐ |
+| Special-03 | **AI 技术选型** | [选型手册](docs/special-topics/special-03-tech-selection.md) - 从模型到基础设施的决策方法论 | ⭐⭐⭐⭐ |
+| Special-04 | **大模型创业** | [创业指南](docs/special-topics/special-04-llm-startup.md) - 从 0 到 1 的 AI 创业实战方法论 | ⭐⭐⭐⭐⭐ |
+| Special-05 | **Skills 工程实践** | [实践记录](docs/special-topics/special-05-codex-skills-practice.md) - 用 15 个 Codex 技能实际打磨本项目的归档 | ⭐⭐⭐ |
+| Special-06 | **智能体平台架构** | [平台架构设计](docs/special-topics/special-06-agent-platform-architecture.md) - 对标 OpenRouter 的平台从零到一架构 | ⭐⭐⭐⭐⭐ |
+| Special-07 | **推理模型** | [推理模型与测试时计算](docs/special-topics/special-07-reasoning-models.md) - o1/R1、RLVR/GRPO、长思维链 | ⭐⭐⭐⭐ |
+| Special-08 | **前沿技术年报** | [2025–2026 前沿年报](docs/special-topics/special-08-frontier-2026.md) - 长上下文/MoE/小模型/Agentic Coding | ⭐⭐⭐⭐ |
+| Special-09 | **核心概念图解** | [20 张图讲透大模型](docs/special-topics/special-09-core-concepts-visualized.md) - 注意力/KV Cache/MoE/LoRA/RAG/Agent 可视化 | ⭐⭐⭐ |
 
 ---
 

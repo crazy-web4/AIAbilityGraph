@@ -139,7 +139,11 @@ def create_fewshot_prompt(task: str, examples: List[dict], query: str):
 
 ---
 
+
+
 ## 4.2.2 高级提示技巧
+
+
 
 ### 1. 思维链（Chain-of-Thought）
 
@@ -210,6 +214,8 @@ def create_cot_prompt(question: str, examples: List[dict] = None):
     
     return "\n\n".join(prompt_parts)
 ```
+
+
 
 ### 2. 自我一致性（Self-Consistency）
 
@@ -293,6 +299,8 @@ def extract_answer(text: str) -> str:
     sentences = text.split('。')
     return sentences[-2] if len(sentences) > 1 else text
 ```
+
+
 
 ### 3. ReAct（Reasoning + Acting）
 
@@ -438,6 +446,8 @@ class ReActAgent:
 ```
 
 ---
+
+
 
 ## 4.2.3 提示词优化
 
@@ -593,6 +603,8 @@ async def optimize_classification_prompt():
 
 ---
 
+
+
 ## 4.2.4 提示词安全防护
 
 ```python
@@ -695,6 +707,8 @@ safe_prompt = guard.create_safe_prompt(
 
 ---
 
+
+
 ## 练习题
 
 1. **提示设计**：为代码审查任务设计一个结构化提示词模板。
@@ -706,3 +720,8 @@ safe_prompt = guard.create_safe_prompt(
 ---
 
 [← 上一节：4.1 API 开发](4-1-api-development.md) | [下一节：4.3 RAG 应用开发 →](4-3-rag.md)
+
+
+
+
+

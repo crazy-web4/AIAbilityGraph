@@ -331,4 +331,4 @@ if __name__ == "__main__":
 
 ---
 
-[← 上一节：5.2 AI 产品设计](5-2-product-design.md) | [第 6 章：算法工程能力 →](../chapter-6/README.md)
+[← 上一节：5.2 AI 产品设计](5-2-product-design.md) | [下一节：5.4 AI 项目管理与产品管理 →](5-4-project-management.md)

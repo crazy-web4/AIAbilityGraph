@@ -265,7 +265,7 @@ if __name__ == "__main__":
 
     # 单位经济分析
     print("\n【单位经济模型】")
-    unit econ = calculate_unit_economics(
+    unit_econ = calculate_unit_economics(
         price_per_request=0.01,  # ¥0.01/请求
         cost_per_request=0.003,  # ¥0.003/请求
         requests_per_month=1000000,  # 100 万请求/月

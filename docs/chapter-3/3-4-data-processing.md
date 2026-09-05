@@ -259,6 +259,8 @@ if __name__ == "__main__":
 
 ---
 
+
+
 ## 3.4.2 数据去重技术
 
 ### MinHash LSH 去重
@@ -370,6 +372,8 @@ if __name__ == "__main__":
 ```
 
 ---
+
+
 
 ## 3.4.3 数据质量评估
 
@@ -499,6 +503,8 @@ def score_dataset(file_path: str, output_path: str):
 
 ---
 
+
+
 ## 3.4.4 数据混合策略
 
 ```python
@@ -584,6 +590,8 @@ RECOMMENDED_MIX = {
 ```
 
 ---
+
+
 
 ## 练习题
 

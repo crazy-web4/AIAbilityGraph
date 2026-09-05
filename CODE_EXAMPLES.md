@@ -112,6 +112,25 @@ pip install openai
 
 ---
 
+## 番外篇示例
+
+### Special-06：智能体平台（模型网关 / Durable Agent / MCP）
+
+| 文件 | 描述 | 运行方式 |
+|------|------|----------|
+| `examples/special-06/model_router.py` | 多 Provider 路由 + 熔断/重试/fallback + 缓存（离线 Mock 可跑） | `python model_router.py` |
+| `examples/special-06/durable_agent.py` | Durable Agent Loop：检查点、崩溃恢复、幂等工具、预算护栏 | `python durable_agent.py` |
+| `examples/special-06/mcp_server.py` | MCP Server 最小示例（订单查询/退款工单，Streamable HTTP） | `pip install "mcp[cli]" && python mcp_server.py` |
+
+### Special-07：推理模型
+
+| 文件 | 描述 | 运行方式 |
+|------|------|----------|
+| `examples/special-07/reasoning_api.py` | 推理模型调用：思考过程分离、思考预算（离线 Mock 可跑） | `python reasoning_api.py` |
+| `examples/special-07/distill_reasoning.py` | 推理蒸馏：生成可验证轨迹、过滤、导出 SFT 数据集 | `python distill_reasoning.py` |
+
+---
+
 ## 依赖汇总
 
 ### 核心依赖

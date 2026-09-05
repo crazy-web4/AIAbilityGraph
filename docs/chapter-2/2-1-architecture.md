@@ -86,6 +86,8 @@ class ScaledDotProductAttention(nn.Module):
 
 ---
 
+
+
 ## 2.1.2 架构范式对比
 
 ### 三种 Transformer 架构
@@ -232,6 +234,8 @@ class T5StyleModel(nn.Module):
 
 ---
 
+
+
 ## 2.1.3 现代大模型关键技术
 
 ### 1. RoPE 旋转位置编码 (Rotary Position Embedding)
@@ -357,6 +361,8 @@ class SwiGLUFFN(nn.Module):
 ```
 
 ---
+
+
 
 ## 2.1.4 Llama 架构详解
 
@@ -602,6 +608,8 @@ class LlamaStyleModel(nn.Module):
 
 ---
 
+
+
 ## 架构对比总结
 
 | 特性 | BERT | GPT | Llama |
@@ -614,6 +622,16 @@ class LlamaStyleModel(nn.Module):
 | **典型应用** | 分类、理解 | 生成 | 对话、生成 |
 
 ---
+
+
+
+
+
+
+
+
+
+
 
 ## 练习题
 

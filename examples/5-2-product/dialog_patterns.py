@@ -240,9 +240,9 @@ class DialogManager:
     def _generate_confirmation(self, user_input: str, context: DialogContext) -> str:
         """生成确认式响应"""
         if "删除" in user_input:
-            return "⚠️ 删除操作无法撤销，确认要删除吗？\n\n请回复"确认"继续，或回复"取消"放弃。"
+            return "⚠️ 删除操作无法撤销，确认要删除吗？\n\n请回复「确认」继续，或回复「取消」放弃。"
         elif "退出" in user_input:
-            return "确认要退出吗？\n\n请回复"确认"继续。"
+            return "确认要退出吗？\n\n请回复「确认」继续。"
         else:
             return f"我理解您想要：{user_input}\n\n确认继续吗？"
 
