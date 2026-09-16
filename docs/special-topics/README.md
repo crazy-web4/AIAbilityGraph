@@ -15,6 +15,8 @@
 | Special-07 | [推理模型与测试时计算](special-07-reasoning-models.md) | ⭐⭐⭐⭐ | 30 分钟 |
 | Special-08 | [大模型前沿技术年报（2025–2026）](special-08-frontier-2026.md) | ⭐⭐⭐⭐ | 30 分钟 |
 | Special-09 | [核心概念图解：20 张图讲透大模型](special-09-core-concepts-visualized.md) | ⭐⭐⭐ | 25 分钟 |
+| Special-10 | [TTS Provider 实战：Qwen3-TTS 音频合成](tts-providers/qwen3-tts.md) | ⭐⭐⭐ | 20 分钟 |
+| Special-11 | [Qoder 使用指南](special-11-qoder-usage-guide.md) | ⭐⭐ | 25 分钟 |
 
 ---
 
@@ -124,6 +126,35 @@
 **核心主题**：用 mermaid 示意图把最容易"似懂非懂"的机制画出来，建立从文本到生成的完整直觉。
 
 **覆盖内容**：分词与 embedding、Transformer block、QKV 注意力、KV Cache、训练三阶段、RLHF/DPO、LoRA、量化、MoE、三种并行、CoT、RAG、Agent Loop、MCP、模型级联、连续批处理、智能体评估、HITL 持久化、测试时计算光谱。
+
+---
+
+### Special-10: TTS Provider 实战：Qwen3-TTS 音频合成
+
+**核心主题**：web-video-presentation skill 的 TTS 音频合成实战，以 Qwen3-TTS 为例讲解 provider 架构与集成流程。
+
+**本番外篇覆盖内容**：
+1. TTS Provider 三函数契约（tts_synthesize / tts_check / tts_install_help）
+2. Qwen3-TTS API 规格与认证方式
+3. 音色列表与语速/音调/音量调节参数
+4. 性能基准与成本估算
+5. 故障排查与重试策略
+6. 可替代部署方案（本地 vLLM / 其他 Provider）
+
+---
+
+### Special-11: Qoder 使用指南
+
+**核心主题**：面向 AI 工程师的 Qoder 实操手册，从基础交互到 Agent / Quest / Repo Wiki / Memory / MCP / Skills 的完整用法，并结合本项目给出可照做的工作流。
+
+**本番外篇覆盖内容**：
+1. Qoder 三层能力模型（理解层 / 执行层 / 扩展层）
+2. 五种交互模式（Agent / Plan / Ask / Debug / Quest）与选择建议
+3. 上下文工程：语义检索、符号索引、AGENTS.md 规则、上下文优先级
+4. Repo Wiki、Quest Mode、Memory 记忆系统用法
+5. Skills 技能系统、MCP 外部工具集成、Subagent 子智能体
+6. 终端/预览/调试，以及新增番外篇、批量校验示例等实战工作流
+7. 最佳实践与避坑清单、快捷键速查
 
 ---
 

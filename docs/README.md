@@ -59,6 +59,8 @@ docs/
 | Special-07 | [推理模型与测试时计算](special-topics/special-07-reasoning-models.md) |
 | Special-08 | [大模型前沿技术年报（2025–2026）](special-topics/special-08-frontier-2026.md) |
 | Special-09 | [核心概念图解：20 张图讲透大模型](special-topics/special-09-core-concepts-visualized.md) |
+| Special-10 | [TTS Provider 实战：Qwen3-TTS 音频合成](special-topics/tts-providers/qwen3-tts.md) |
+| Special-11 | [Qoder 使用指南](special-topics/special-11-qoder-usage-guide.md) |
 
 ## 配套资源
 
