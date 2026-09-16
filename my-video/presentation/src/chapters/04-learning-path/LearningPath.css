@@ -1,0 +1,333 @@
+/* ── Chapter 04 · learning-path ──────────────────────────────────
+   indigo-porcelain · quiet academic editorial.
+   Three learning paths branching from the shared 第 1 章 start.
+   All colors / fonts come from theme tokens. Prefix: lp-            */
+
+.lp-scene {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  overflow: hidden;
+}
+
+.lp-kicker {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 0 · 三岔图引入
+   ════════════════════════════════════════════════════════════════ */
+.lp-s0 {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.lp-s0-head {
+  position: relative;
+  z-index: 3;
+  max-width: 1760px;
+}
+.lp-s0-title {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(76px, 7.5vw, 138px);
+  line-height: 1.06;
+  letter-spacing: var(--track-tight);
+  color: var(--text);
+  margin: 12px 0 0 0;
+}
+.lp-s0-title .lp-digits {
+  color: var(--accent);
+  margin-right: 0.25em;
+}
+.lp-s0-sub {
+  margin-top: clamp(22px, 2.4vw, 40px);
+  font-family: var(--font-display-cn);
+  font-size: clamp(26px, 2.2vw, 40px);
+  color: var(--text-mute);
+}
+
+.lp-s0-svg {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 400px;
+  margin-top: clamp(20px, 2.5vw, 40px);
+  overflow: visible;
+}
+
+/* 共享起点 · 第 1 章 */
+.lp-broot-ring {
+  fill: var(--surface-2);
+  stroke: var(--accent);
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lp-pop-in 700ms var(--ease-quart) both;
+}
+.lp-broot-num {
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  font-size: 30px;
+  fill: var(--accent);
+  animation: lp-fade-in 700ms var(--ease-quart) both;
+}
+.lp-broot-tag {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  fill: var(--text-mute);
+  animation: lp-fade-up 800ms var(--ease-quart) both;
+  animation-delay: 250ms;
+}
+
+/* 三条分岔线：自绘 + 端点标签逐个浮现 */
+.lp-branch-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2400;
+  stroke-dashoffset: 2400;
+  animation: lp-draw 1400ms var(--ease-expo) forwards;
+  animation-delay: calc(var(--bi, 0) * 520ms);
+}
+.lp-branch-end {
+  opacity: 0;
+  animation: lp-fade-up 760ms var(--ease-quart) forwards;
+  animation-delay: calc(560ms + var(--bi, 0) * 520ms);
+}
+.lp-bname {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: 34px;
+  fill: var(--text);
+}
+.lp-ben {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  fill: var(--text-faint);
+}
+.lp-bweeks {
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  font-size: 40px;
+  fill: var(--accent);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 1-3 · 逐条路径揭示（角色选择 + 章节时间线）
+   ════════════════════════════════════════════════════════════════ */
+.lp-s {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部：三条角色 chip（上下文）+ hero 周数 */
+.lp-top {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+}
+.lp-chips {
+  display: flex;
+  gap: 18px;
+  padding-top: 4px;
+}
+.lp-chip {
+  padding: 8px 20px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  letter-spacing: 0.04em;
+  color: var(--text-mute);
+  transition: color var(--dur-base) var(--ease-quart),
+              border-color var(--dur-base) var(--ease-quart);
+}
+.lp-chip.on {
+  color: var(--surface);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.lp-hero {
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  animation: lp-fade-up 760ms var(--ease-quart) both;
+}
+.lp-role {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.lp-role-name {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(44px, 4vw, 72px);
+  line-height: 1.05;
+  color: var(--text);
+}
+.lp-role-tag {
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1.2vw, 20px);
+  color: var(--text-mute);
+}
+.lp-weeks {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+.lp-weeks-num {
+  font-size: clamp(96px, 8.5vw, 160px);
+  line-height: 0.85;
+  color: var(--accent);
+}
+.lp-weeks-unit {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(34px, 3vw, 52px);
+  color: var(--text);
+  padding-bottom: 8px;
+}
+
+/* 车道 SVG */
+.lp-lanes {
+  flex: 1;
+  width: 100%;
+  margin-top: 24px;
+  overflow: visible;
+}
+
+/* 三条骨架车道（灰化上下文） */
+.lp-skel {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+.lp-skel-dot {
+  fill: var(--surface-2);
+  stroke: var(--rule);
+  stroke-width: 2;
+  opacity: 0.7;
+}
+
+/* 共享起点 · 第 1 章 */
+.lp-start-ring {
+  fill: var(--surface-2);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.lp-start-num {
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  font-size: 34px;
+  fill: var(--accent);
+}
+.lp-start-tag {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  fill: var(--text-mute);
+}
+
+/* 当前路径：连线自绘 */
+.lp-way {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 2600;
+  stroke-dashoffset: 2600;
+  animation: lp-draw var(--dur-cinematic) var(--ease-expo) forwards;
+}
+
+/* 当前路径：节点按序点亮 */
+.lp-node-g {
+  transform-box: fill-box;
+}
+.lp-node {
+  fill: var(--surface-2);
+  stroke: var(--rule);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: lp-node-on 1050ms var(--ease-quart) forwards;
+  animation-delay: var(--ld, 600ms);
+}
+.lp-nnum {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: 30px;
+  fill: var(--surface);
+  opacity: 0;
+  animation: lp-fade-in 500ms var(--ease-quart) forwards;
+  animation-delay: var(--ld, 600ms);
+}
+.lp-nlabel {
+  font-family: var(--font-display-cn);
+  font-weight: 600;
+  font-size: 23px;
+  fill: var(--text);
+  opacity: 0;
+  animation: lp-fade-up 620ms var(--ease-quart) forwards;
+  animation-delay: calc(var(--ld, 600ms) + 180ms);
+}
+.lp-week {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  letter-spacing: 0.06em;
+  fill: var(--accent);
+  opacity: 0;
+  animation: lp-fade-in 500ms var(--ease-quart) forwards;
+  animation-delay: calc(var(--ld, 600ms) + 320ms);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Shared keyframes
+   ════════════════════════════════════════════════════════════════ */
+@keyframes lp-draw {
+  from { stroke-dashoffset: 2600; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes lp-node-on {
+  0%   { opacity: 0; transform: scale(0.4); fill: var(--surface-2); stroke: var(--rule); }
+  60%  { opacity: 1; transform: scale(1.12); fill: var(--accent);   stroke: var(--accent); }
+  100% { opacity: 1; transform: scale(1);    fill: var(--accent);   stroke: var(--accent); }
+}
+@keyframes lp-pop-in {
+  0%   { opacity: 0; transform: scale(0.6); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes lp-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes lp-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

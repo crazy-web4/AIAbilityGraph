@@ -1,0 +1,228 @@
+/* ── Chapter 01 · coldopen ──────────────────────────────────────
+   indigo-porcelain · quiet academic editorial.
+   All colors / fonts come from theme tokens. Prefix: cd-          */
+
+.cd-scene {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ── shared small label ── */
+.cd-kicker {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 1 · 钩子 —— 数百知识点（散点混沌）+ 疑问 hero
+   ════════════════════════════════════════════════════════════════ */
+.cd-s1 {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* 散点场：上百个"知识点"。step0 散成混沌，step1 归位成网格。
+   transform 由 .is-chaos / .is-grid 控制，过渡由 transition 驱动。 */
+.cd-dotfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cd-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  transition: transform var(--dur-cinematic) var(--ease-quart),
+              background var(--dur-base) var(--ease-quart);
+}
+/* step0：从网格原点散开（--dx/--dy 偏移），并逐点入场（stagger） */
+.cd-dotfield.is-chaos .cd-dot {
+  transform: translate(var(--dx), var(--dy));
+  opacity: 0;
+  animation: cd-dot-in var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(var(--i, 0) * 24ms);
+}
+@keyframes cd-dot-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* step1：归位回网格原点（translate→0），转为强调色，带错峰延迟 */
+.cd-dotfield.is-grid .cd-dot {
+  transform: translate(0, 0);
+  background: var(--accent);
+  opacity: 1;
+  transition-delay: calc(var(--i, 0) * 18ms);
+}
+
+.cd-s1-body {
+  position: relative;
+  z-index: 2;
+  max-width: 1500px;
+}
+.cd-s1-q {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(72px, 8vw, 148px);
+  line-height: 1.12;
+  letter-spacing: var(--track-tight);
+  color: var(--text);
+  margin: 0;
+}
+.cd-s1-em {
+  color: var(--accent);
+}
+
+.cd-s1-sub {
+  margin-top: clamp(28px, 3vw, 48px);
+  font-family: var(--font-display-cn);
+  font-size: clamp(26px, 2.2vw, 40px);
+  color: var(--text-mute);
+  line-height: 1.5;
+}
+.cd-s1-q .cd-rise { display: inline-block; }
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 2 · 定位 —— 散点归位成"一张图"（混沌 → 有序）
+   ════════════════════════════════════════════════════════════════ */
+.cd-s2 {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.cd-s2-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cd-s2-cell {
+  position: absolute;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--text-faint);
+  transition: transform var(--dur-cinematic) var(--ease-quart),
+              background var(--dur-base) var(--ease-quart);
+  transition-delay: calc(var(--i, 0) * 18ms);
+}
+.cd-s2-cell.in { background: var(--accent); }
+
+.cd-s2-mid {
+  position: relative;
+  z-index: 2;
+  max-width: 1600px;
+}
+.cd-s2-label { margin-bottom: clamp(20px, 2vw, 32px); }
+.cd-s2-name {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(64px, 7vw, 120px);
+  line-height: 1.1;
+  color: var(--text);
+  margin: 0;
+}
+.cd-s2-name .cd-en {
+  font-family: var(--font-display-en);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+}
+.cd-s2-desc {
+  margin-top: clamp(24px, 2.4vw, 40px);
+  font-family: var(--font-display-cn);
+  font-size: clamp(28px, 2.4vw, 44px);
+  color: var(--text-mute);
+  line-height: 1.55;
+  max-width: 1280px;
+}
+.cd-s2-desc strong { color: var(--text); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 3 · 主线 —— 横向自绘路径 5 节点 + 七个章节 tally
+   ════════════════════════════════════════════════════════════════ */
+.cd-s3 {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.cd-s3-path {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 260px;
+  /* 不压缩竖轴比例：让 5 节点横向路径保持等比，避免圆形压扁 */
+  overflow: visible;
+}
+.cd-s3-line {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.cd-s3-line-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  transition: stroke-dashoffset var(--dur-cinematic) var(--ease-expo);
+}
+.cd-s3-line-fill.in { stroke-dashoffset: 0; }
+
+.cd-s3-node {
+  fill: var(--surface-2);
+  stroke: var(--rule);
+  stroke-width: 2;
+  transition: stroke var(--dur-base) var(--ease-quart);
+}
+.cd-s3-node.in { stroke: var(--accent); }
+
+.cd-s3-label {
+  font-family: var(--font-display-cn);
+  font-size: clamp(22px, 2vw, 34px);
+  fill: var(--text-mute);
+  transition: fill var(--dur-base) var(--ease-quart);
+}
+.cd-s3-label.in { fill: var(--text); font-weight: 700; }
+.cd-s3-top {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  fill: var(--text-faint);
+}
+
+.cd-s3-title {
+  margin-top: clamp(30px, 3vw, 48px);
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(48px, 5vw, 84px);
+  color: var(--text);
+  text-align: center;
+}
+.cd-s3-title .cd-digits {
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  color: var(--accent);
+}

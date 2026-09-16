@@ -1,0 +1,352 @@
+/* ── Chapter 05 · action ─────────────────────────────────────────
+   indigo-porcelain · quiet academic editorial close.
+   All colors / fonts come from theme tokens. Prefix: ac-.
+   Motion paced for the "quiet editorial" theme (slow, deliberate).   */
+
+.ac-scene {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* shared small label */
+.ac-kicker {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   keyframes (mount-triggered so each step reliably plays on step-in)
+   ════════════════════════════════════════════════════════════════ */
+@keyframes ac-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes ac-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ac-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ac-cursor-in {
+  0%   { opacity: 0; transform: translate(0px, -210px) rotate(6deg); }
+  55%  { opacity: 1; transform: translate(96px, -120px) rotate(6deg); }
+  100% { opacity: 1; transform: translate(108px, 30px) rotate(6deg); }
+}
+@keyframes ac-press {
+  0%, 60%   { transform: scale(1); }
+  75%       { transform: scale(0.94); }
+  92%       { transform: scale(1.02); }
+  100%      { transform: scale(1); }
+}
+@keyframes ac-ripple {
+  0%   { opacity: 0.5; transform: translate(-50%, -50%) scale(0.3); }
+  70%  { opacity: 0;   transform: translate(-50%, -50%) scale(1.9); }
+  100% { opacity: 0;   transform: translate(-50%, -50%) scale(1.9); }
+}
+@keyframes ac-star-on {
+  0%   { fill: transparent; opacity: 1; }
+  100% { fill: var(--accent); opacity: 1; }
+}
+@keyframes ac-rule-draw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 0 · 从 README 开始 + MIT License（自由学自由用）
+   ════════════════════════════════════════════════════════════════ */
+.ac-s0 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.ac-s0-kicker {
+  margin-bottom: 26px;
+  animation: ac-rise 0.7s var(--ease-quart) both;
+}
+.ac-s0-svg {
+  width: 100%;
+  max-width: 1500px;
+  height: auto;
+  overflow: visible;
+}
+/* README 文档节点 */
+.ac-s0-file rect {
+  fill: var(--surface-2);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.ac-s0-file path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.ac-s0-file {
+  opacity: 0;
+  animation: ac-rise 0.9s var(--ease-quart) 0.1s both;
+}
+.ac-s0-filet,
+.ac-s0-gatein {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  fill: var(--text);
+}
+.ac-s0-filet {
+  font-size: 30px;
+  opacity: 0;
+  animation: ac-rise 0.9s var(--ease-quart) 0.3s both;
+}
+/* 底导线（静止虚线） */
+.ac-s0-conn-base {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 3;
+  stroke-dasharray: 2 14;
+  stroke-linecap: round;
+}
+/* 自绘主线：README 门口画入大门开口 */
+.ac-s0-conn-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: ac-draw 1.7s var(--ease-expo) 0.45s forwards;
+}
+/* 许可证大门（拱）*/
+.ac-s0-arch-base {
+  fill: var(--accent-soft);
+  stroke: var(--rule);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.ac-s0-arch-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: ac-draw 1.35s var(--ease-expo) 1.5s forwards;
+}
+.ac-s0-gatein {
+  font-size: 44px;
+  opacity: 0;
+  animation: ac-fade 0.9s var(--ease-quart) 2.6s both;
+}
+/* 许可证徽记 */
+.ac-s0-lic {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ac-s0-lic-title {
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  letter-spacing: var(--hero-num-track);
+  font-size: clamp(56px, 6vw, 104px);
+  color: var(--accent);
+  line-height: 1;
+  opacity: 0;
+  animation: ac-rise 0.9s var(--ease-quart) 2.1s both;
+}
+.ac-s0-lic-sub {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(30px, 3vw, 50px);
+  color: var(--text);
+  opacity: 0;
+  animation: ac-rise 0.8s var(--ease-quart) 2.5s both;
+}
+.ac-s0-lic-detail {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  opacity: 0;
+  animation: ac-fade 0.8s var(--ease-quart) 2.9s both;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 1 · 号召 —— Star 按钮按压 / 波纹 / 点亮
+   ════════════════════════════════════════════════════════════════ */
+.ac-s1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.ac-s1-kicker {
+  margin-bottom: 44px;
+  animation: ac-rise 0.7s var(--ease-quart) both;
+}
+.ac-s1-stage {
+  position: relative;
+  width: 420px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 抽象光标箭头：自右上方飞入，按向按钮 */
+.ac-s1-cursor {
+  position: absolute;
+  left: 46px;
+  top: 4px;
+  width: 44px;
+  height: 44px;
+  fill: var(--text);
+  z-index: 3;
+  opacity: 0;
+  animation: ac-cursor-in 1.35s var(--ease-quart) 0.15s both;
+}
+/* Star 按钮 */
+.ac-s1-btn {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 40px;
+  border-radius: var(--r-sm);
+  border: 2px solid var(--accent);
+  background: var(--surface-2);
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(30px, 3vw, 42px);
+  color: var(--text);
+  box-shadow: var(--card-shadow);
+  animation: ac-press 1.6s var(--ease-quart) 1.05s both;
+}
+.ac-s1-star {
+  width: 40px;
+  height: 40px;
+  fill: transparent;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+  animation: ac-star-on 0.9s var(--ease-quart) 2.15s both;
+}
+/* 波纹扩散环（按压点）*/
+.ac-s1-ripple {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid var(--accent-glow);
+  z-index: 1;
+  opacity: 0;
+  animation: ac-ripple 1.1s var(--ease-quart) 1.5s both;
+}
+/* 号召主文案 */
+.ac-s1-line {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.ac-s1-line-em {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(52px, 5vw, 88px);
+  color: var(--text);
+  opacity: 0;
+  animation: ac-rise 0.8s var(--ease-quart) 2.2s both;
+}
+.ac-s1-line-sub {
+  font-family: var(--font-display-cn);
+  font-size: clamp(26px, 2.4vw, 40px);
+  color: var(--text-mute);
+  line-height: 1.4;
+  opacity: 0;
+  animation: ac-rise 0.8s var(--ease-quart) 2.6s both;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 2 · 收尾大标语（bookend）
+   ════════════════════════════════════════════════════════════════ */
+.ac-s2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.ac-s2-kicker {
+  margin-bottom: 34px;
+  animation: ac-rise 0.7s var(--ease-quart) both;
+}
+.ac-s2-hero {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(68px, 6.6vw, 132px);
+  line-height: 1.08;
+  letter-spacing: var(--track-tight);
+  color: var(--text);
+}
+.ac-s2-row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28em;
+}
+.ac-s2-hl {
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  letter-spacing: var(--hero-num-track);
+  color: var(--accent);
+}
+.ac-s2-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(46px);
+  animation: ac-rise 0.95s var(--ease-expo) both;
+}
+.ac-s2-row2 .ac-s2-word { animation-delay: 0.55s; }
+.ac-s2-row .ac-s2-hl { animation-delay: 0.28s; }
+.ac-s2-row .ac-s2-word:nth-child(1) { animation-delay: 0.1s; }
+.ac-s2-row .ac-s2-word:nth-child(3) { animation-delay: 0.4s; }
+
+/* 底线自绘：从左到右扫过收尾 */
+.ac-s2-rule {
+  margin-top: 34px;
+  width: min(560px, 58vw);
+  height: var(--rule-w);
+  background: var(--accent);
+  transform-origin: center;
+  transform: scaleX(0);
+  animation: ac-rule-draw 1.3s var(--ease-expo) 0.85s both;
+}
+.ac-s2-tail {
+  margin-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  opacity: 0;
+  animation: ac-fade 0.9s var(--ease-quart) 1.5s both;
+}

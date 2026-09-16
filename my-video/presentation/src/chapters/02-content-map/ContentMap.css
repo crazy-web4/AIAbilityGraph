@@ -1,0 +1,357 @@
+/* ── Chapter 02 · content-map ─────────────────────────────────────
+   indigo-porcelain · academic editorial · seven-chapter content map.
+   All colors / fonts via theme tokens. Prefix: cm-                     */
+
+.cm-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   地图轴 —— 持久 7 节点横轴，贯穿全部 9 步
+   ════════════════════════════════════════════════════════════════ */
+.cm-axis {
+  position: absolute;
+  left: var(--stage-pad-x);
+  right: var(--stage-pad-x);
+  bottom: clamp(52px, 6vh, 84px);
+  width: calc(100% - 2 * var(--stage-pad-x));
+  height: 340px;
+  z-index: 1;
+  overflow: visible;
+}
+
+.cm-rail {
+  stroke: var(--rule);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+  opacity: 0.85;
+}
+
+/* ── 切分线：step0 自绘，把前四章（硬核）与后三章（外溢）切开 ── */
+.cm-divider {
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-dasharray: 320;
+  stroke-dashoffset: 320;
+  transition: stroke-dashoffset var(--dur-cinematic) var(--ease-expo);
+}
+.cm-divider.in { stroke-dashoffset: 0; }
+
+/* ── 外溢流线：step5 自绘（1-4 → 5-7）+ 流动光点 ── */
+.cm-flow {
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 460;
+  stroke-dashoffset: 460;
+  transition: stroke-dashoffset var(--dur-cinematic) var(--ease-expo);
+}
+.cm-flow.in { stroke-dashoffset: 0; }
+.cm-flow-head {
+  fill: var(--accent);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-quart);
+}
+.cm-flow-head.in {
+  opacity: 1;
+  transition-delay: 880ms;
+}
+.cm-flow-spark {
+  fill: var(--accent-glow);
+  offset-path: path("M 958 120 Q 1070 32 1205 120");
+  offset-distance: 0%;
+  animation: cm-spark-run var(--dur-cinematic) var(--ease-expo) forwards;
+  animation-delay: 120ms;
+}
+@keyframes cm-spark-run {
+  0%   { offset-distance: 10%; r: 6; opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { offset-distance: 87%; r: 3; opacity: 0; }
+}
+
+/* ── 7 个章节节点：状态机（is-pre / is-active / is-done / is-soft / is-intro） ── */
+.cm-node .cm-node-ring {
+  transition: fill var(--dur-base) var(--ease-quart),
+              stroke var(--dur-base) var(--ease-quart);
+}
+.cm-node .cm-node-num,
+.cm-node .cm-node-name {
+  transition: fill var(--dur-base) var(--ease-quart);
+}
+
+/* 未来（还讲到）—— 淡淡的轮廓 */
+.cm-node.is-pre .cm-node-ring {
+  fill: var(--surface-2);
+  stroke: var(--rule);
+  stroke-width: 2;
+}
+.cm-node.is-pre .cm-node-num { fill: var(--text-mute); }
+.cm-node.is-pre .cm-node-name { fill: var(--text-faint); }
+
+/* 已点亮（上下文，保留） */
+.cm-node.is-done .cm-node-ring {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.cm-node.is-done .cm-node-num { fill: var(--accent); font-weight: 700; }
+.cm-node.is-done .cm-node-name { fill: var(--text-2); }
+
+/* 正在点亮（当前章）—— 通过 transition 触发填充 + 光环脉冲 */
+.cm-node.is-active .cm-node-ring {
+  fill: var(--accent);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.cm-node.is-active .cm-node-num { fill: var(--surface); font-weight: 700; }
+.cm-node.is-active .cm-node-name { fill: var(--text); font-weight: 700; }
+.cm-node.is-active .cm-node-ring {
+  animation: cm-active-halo 1600ms var(--ease-soft) both;
+}
+@keyframes cm-active-halo {
+  0%   { filter: drop-shadow(0 0 0 var(--accent-glow)); }
+  60%  { filter: drop-shadow(0 0 22px var(--accent-glow)); }
+  100% { filter: drop-shadow(0 0 0 var(--accent-soft)); }
+}
+
+/* step0 的全图：1-4 略亮、5-7 更弱的骨架 */
+.cm-node.is-hard .cm-node-ring {
+  fill: var(--surface-2);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.cm-node.is-hard .cm-node-num { fill: var(--accent); }
+.cm-node.is-hard .cm-node-name { fill: var(--text-2); }
+.cm-node.is-soft .cm-node-ring {
+  fill: var(--surface);
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.cm-node.is-soft .cm-node-num { fill: var(--text-faint); }
+.cm-node.is-soft .cm-node-name { fill: var(--text-faint); }
+
+/* step5 引入后三章：轮廓出现 */
+.cm-node.is-intro .cm-node-ring {
+  fill: var(--surface-2);
+  stroke: var(--accent);
+  stroke-width: 2;
+  animation: cm-intro-in 900ms var(--ease-quart) both;
+}
+.cm-node.is-intro .cm-node-num { fill: var(--accent); }
+.cm-node.is-intro .cm-node-name { fill: var(--text-2); }
+@keyframes cm-intro-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cm-region {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+}
+.cm-region-hard { fill: var(--text-mute); opacity: 0.35; transition: opacity var(--dur-slow) var(--ease-quart); }
+.cm-region-soft { fill: var(--text-faint); opacity: 0.35; transition: opacity var(--dur-slow) var(--ease-quart); }
+.cm-region.in { opacity: 1; }
+
+/* ════════════════════════════════════════════════════════════════
+   顶部叙事层（每步重挂载 → 入场动画在 mount 时跑）
+   ════════════════════════════════════════════════════════════════ */
+.cm-s {
+  position: absolute;
+  inset: clamp(56px, 5vh, 76px) 0 320px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 3;
+}
+
+.cm-kicker {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: clamp(24px, 3vh, 44px);
+  animation: cm-fade-rise var(--dur-slow) var(--ease-quart) both;
+}
+
+.cm-hero {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(64px, 6vw, 104px);
+  line-height: 1.12;
+  letter-spacing: var(--track-tight);
+  color: var(--text);
+  margin: 0;
+  animation: cm-fade-rise var(--dur-cinematic) var(--ease-quart) both;
+}
+.cm-hero .cm-ch-num,
+.cm-hero-num {
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  color: var(--accent);
+}
+.cm-hero-num-1 {
+  display: inline-block;
+  margin-right: 0.28em;
+  animation: cm-num-clock 900ms var(--ease-quart) both;
+}
+@keyframes cm-num-clock {
+  from { opacity: 0; transform: scale(1.5) rotate(-8deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.cm-tag {
+  margin-top: clamp(20px, 2.4vh, 34px);
+  font-family: var(--font-display-cn);
+  font-size: clamp(26px, 2.4vw, 40px);
+  color: var(--text-mute);
+  animation: cm-fade-rise var(--dur-slow) var(--ease-quart) both;
+  animation-delay: 200ms;
+}
+.cm-sub {
+  margin-top: clamp(20px, 2.4vh, 34px);
+  font-family: var(--font-display-cn);
+  font-size: clamp(26px, 2.4vw, 40px);
+  color: var(--text-mute);
+  line-height: 1.5;
+  max-width: 1200px;
+  animation: cm-fade-rise var(--dur-slow) var(--ease-quart) both;
+  animation-delay: 250ms;
+}
+.cm-sub strong { color: var(--accent); }
+
+@keyframes cm-fade-rise {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 术语芯片行 ── */
+.cm-chiprow {
+  margin-top: clamp(34px, 4vh, 60px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 22px;
+  max-width: 1500px;
+}
+.cm-chip {
+  font-family: var(--font-display-cn);
+  font-size: clamp(24px, 2.2vw, 36px);
+  color: var(--text-2);
+  padding: 12px 26px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--surface-2);
+  box-shadow: 0 1px 0 var(--rule);
+}
+.cm-count {
+  margin-top: clamp(22px, 3vh, 42px);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+  opacity: 0.9;
+  animation: cm-fade-rise var(--dur-slow) var(--ease-quart) both;
+  animation-delay: 300ms;
+}
+
+/* 每步芯片动效各不相同：级联下坠 / 横向迸出 / 逐层下压 / 行扫过 / 竖叠 / 弹出 / 淡入 */
+.cm-ct-1 .cm-chip {
+  animation: cm-chip-cascade 700ms var(--ease-quart) both;
+  animation-delay: calc(var(--i) * 150ms);
+}
+@keyframes cm-chip-cascade {
+  from { opacity: 0; transform: translateY(-34px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cm-ct-2 .cm-chip {
+  animation: cm-chip-shoot 700ms var(--ease-overshoot) both;
+  animation-delay: calc(var(--i) * 160ms);
+}
+@keyframes cm-chip-shoot {
+  from { opacity: 0; transform: translateX(-70px) scale(0.5); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.cm-ct-3 .cm-chip {
+  animation: cm-chip-drop 620ms var(--ease-quart) both;
+  animation-delay: calc(var(--i) * 130ms);
+}
+@keyframes cm-chip-drop {
+  from { opacity: 0; transform: translateY(-22px) scaleX(0.6); }
+  to   { opacity: 1; transform: translateY(0) scaleX(1); }
+}
+
+.cm-ct-4 .cm-chip {
+  animation: cm-chip-scan 700ms var(--ease-quart) both;
+  animation-delay: calc(var(--i) * 120ms);
+}
+@keyframes cm-chip-scan {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to   { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+
+.cm-ct-6 .cm-chip {
+  animation: cm-chip-rise 650ms var(--ease-quart) both;
+  animation-delay: calc(var(--i) * 150ms);
+}
+@keyframes cm-chip-rise {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cm-ct-7 .cm-chip {
+  animation: cm-chip-pop 600ms var(--ease-overshoot) both;
+  animation-delay: calc(var(--i) * 160ms);
+}
+@keyframes cm-chip-pop {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.cm-ct-8 .cm-chip {
+  animation: cm-chip-fade 700ms var(--ease-soft) both;
+  animation-delay: calc(var(--i) * 170ms);
+}
+@keyframes cm-chip-fade {
+  from { opacity: 0; letter-spacing: 0.4em; }
+  to   { opacity: 1; letter-spacing: initial; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   step8 收尾：全图扫描光（一次性，mount 时跑）
+   ════════════════════════════════════════════════════════════════ */
+.cm-sweep {
+  position: absolute;
+  left: var(--stage-pad-x);
+  right: var(--stage-pad-x);
+  bottom: clamp(52px, 6vh, 84px);
+  height: 340px;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-soft) 45%,
+    var(--accent-glow) 50%,
+    var(--accent-soft) 55%,
+    transparent 100%
+  );
+  width: 260px;
+  animation: cm-sweep-run var(--dur-cinematic) var(--ease-expo) both;
+}
+@keyframes cm-sweep-run {
+  from { transform: translateX(-160px); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateX(calc(100vw - 60px)); opacity: 0; }
+}

@@ -1,0 +1,546 @@
+/* ── Chapter 03 · highlights ─────────────────────────────────────
+   indigo-porcelain · academic editorial. 数字滚动 / 链条 / 代码行 /
+   流程箭头 / pipeline 四类演示，动作各不同。前缀：hl-              */
+
+.hl-scene {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  overflow: hidden;
+}
+
+.hl-kicker {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 0 · 分量 —— 数齿轮滚动 count-up + hero 标语
+   ════════════════════════════════════════════════════════════════ */
+.hl-s0 {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hl-s0-head {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(58px, 5.6vw, 96px);
+  line-height: 1.1;
+  letter-spacing: var(--track-tight);
+  color: var(--text);
+  margin: 20px 0 0;
+  animation: hl-rise var(--dur-base) var(--ease-quart) both;
+}
+.hl-s0-head em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+/* 四个英雄数字：自左而右 = 口播顺序 */
+.hl-stats {
+  display: flex;
+  gap: clamp(36px, 4vw, 84px);
+  margin-top: clamp(40px, 4vw, 72px);
+}
+.hl-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 240px;
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(var(--k, 0) * 430ms);
+}
+
+/* 数齿轮：一列 0-9，translateY 滚动到目标位 = 数字从 0 滚上来 */
+.hl-od {
+  display: flex;
+  align-items: flex-end;
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  letter-spacing: var(--hero-num-track);
+  color: var(--accent);
+  line-height: 1;
+}
+.hl-dcell {
+  display: inline-block;
+  height: 118px;
+  overflow: hidden;
+}
+.hl-dstrip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(0);
+  animation: hl-roll var(--dur-cinematic) var(--ease-quart) forwards;
+  animation-delay: var(--d, 0ms);
+}
+.hl-drow {
+  height: 118px;
+  line-height: 118px;
+  font-size: 148px;
+}
+@keyframes hl-roll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(calc(var(--t, 0) * -118px)); }
+}
+
+.hl-unit {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: 54px;
+  color: var(--text);
+  margin-left: 8px;
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: var(--d, 0ms);
+}
+.hl-note {
+  margin-top: 18px;
+  font-family: var(--font-display-cn);
+  font-size: clamp(20px, 1.8vw, 28px);
+  color: var(--text-mute);
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: var(--d, 0ms);
+}
+.hl-s0-foot {
+  margin-top: clamp(34px, 3.4vw, 60px);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: 1900ms;
+}
+
+@keyframes hl-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hl-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STEP 1-5 · 四大亮点 —— 左侧 4 槽 + 右侧当前亮点细节
+   ════════════════════════════════════════════════════════════════ */
+.hl-s4 {
+  position: absolute;
+  inset: 0;
+  padding: var(--stage-pad-y) var(--stage-pad-x);
+  display: flex;
+  flex-direction: column;
+}
+
+.hl-s4-head {
+  text-align: left;
+  animation: hl-rise var(--dur-base) var(--ease-quart) both;
+}
+.hl-s4-title {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(52px, 5vw, 88px);
+  line-height: 1.08;
+  color: var(--text);
+  margin: 14px 0 0;
+}
+
+.hl-s4body {
+  flex: 1;
+  display: flex;
+  gap: clamp(48px, 6vw, 110px);
+  align-items: stretch;
+  margin-top: clamp(36px, 4vw, 64px);
+}
+
+/* ── 左侧 · 4 槽列表（1 项 = 1 step）── */
+.hl-rail {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  min-width: 300px;
+}
+.hl-item {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  padding: 14px 18px;
+  border-bottom: var(--rule-w) var(--rule-style) var(--rule);
+}
+.hl-badge {
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  font-size: 30px;
+  color: var(--text-faint);
+  transition: color var(--dur-base) var(--ease-quart);
+}
+.hl-item-label {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(30px, 2.6vw, 44px);
+  color: var(--text);
+  letter-spacing: var(--track-tight);
+}
+
+/* 未揭示：槽位几乎透明，只留序号骨架 */
+.hl-item.is-next { opacity: 0.28; }
+.hl-item.is-next .hl-item-label { color: var(--text-faint); }
+
+/* 已揭示的历史：灰化保留作上下文 */
+.hl-item.is-done {
+  opacity: 0.36;
+}
+.hl-item.is-done .hl-badge { color: var(--text-mute); }
+
+/* 当前：亮起 + 序号强调（ascii transition 拾起节拍） */
+.hl-item.is-cur {
+  opacity: 1;
+}
+.hl-item.is-cur .hl-badge { color: var(--accent); }
+
+/* ── 右侧 · 当前亮点细节 + 迷你演示 ── */
+.hl-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: hl-rise var(--dur-slow) var(--ease-expo) both;
+}
+.hl-detail-head {
+  border-left: 4px solid var(--accent);
+  padding-left: 26px;
+}
+.hl-detail-title {
+  font-family: var(--font-display-cn);
+  font-weight: 700;
+  font-size: clamp(44px, 4.4vw, 76px);
+  line-height: 1.1;
+  color: var(--text);
+  margin: 0;
+  animation: hl-rise var(--dur-base) var(--ease-quart) both;
+}
+.hl-detail-sub {
+  margin-top: 14px;
+  font-family: var(--font-display-cn);
+  font-size: clamp(22px, 2vw, 32px);
+  color: var(--text-mute);
+  animation: hl-rise var(--dur-base) var(--ease-quart) both;
+  animation-delay: 160ms;
+}
+
+.hl-pts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 30px;
+  margin-top: 34px;
+}
+.hl-pt {
+  font-family: var(--font-display-cn);
+  font-weight: 600;
+  font-size: clamp(20px, 1.9vw, 30px);
+  color: var(--text-2);
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(360ms + var(--i, 0) * 140ms);
+}
+.hl-pt::before {
+  content: "·";
+  color: var(--accent);
+  margin-right: 10px;
+}
+
+/* 亮点区域：共同入场节奏 */
+.hl-demo {
+  margin-top: clamp(30px, 3.4vw, 52px);
+  animation: hl-rise var(--dur-slow) var(--ease-expo) both;
+  animation-delay: 320ms;
+}
+
+/* ── 亮点一 demo · 七章链条自绘 ── */
+.hl-demo-chain { position: relative; }
+.hl-chain {
+  width: 100%;
+  height: 210px;
+  overflow: visible;
+}
+.hl-chain-bg {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.hl-chain-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 1600;
+  stroke-dashoffset: 1600;
+  animation: hl-draw var(--dur-cinematic) var(--ease-expo) forwards;
+  animation-delay: 300ms;
+}
+@keyframes hl-draw {
+  to { stroke-dashoffset: 0; }
+}
+.hl-chain-node {
+  fill: var(--surface-2);
+  stroke: var(--rule);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+  animation: hl-pop var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(520ms + var(--i, 0) * 150ms);
+}
+.hl-chain g:last-child .hl-chain-node {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+}
+@keyframes hl-pop {
+  to { transform: scale(1); }
+}
+.hl-chain-label {
+  font-family: var(--font-display-cn);
+  font-size: 21px;
+  fill: var(--text-mute);
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(640ms + var(--i, 0) * 150ms);
+}
+.hl-direction {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  color: var(--text-faint);
+  opacity: 0;
+  animation: hl-fade var(--dur-slow) both;
+  animation-delay: calc(520ms + 6 * 150ms + 120ms);
+}
+.hl-dir-arrow { color: var(--accent); font-size: 22px; }
+
+/* ── 亮点二 demo · 代码行生长 ── */
+.hl-code-tags {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.hl-code-tag {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  background: var(--accent-soft);
+  padding: 8px 20px;
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(300ms + var(--i, 0) * 150ms);
+}
+.hl-code-panel {
+  background: var(--surface-3);
+  border-left: 3px solid var(--accent);
+  padding: 30px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: fit-content;
+  min-width: 680px;
+}
+.hl-code-line {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.hl-code-caret {
+  width: 12px;
+  height: 24px;
+  background: var(--accent);
+  opacity: 0;
+  animation: hl-caret var(--dur-base) var(--ease-quart) infinite;
+  animation-delay: calc(500ms + var(--i, 0) * 260ms);
+}
+@keyframes hl-caret {
+  0%, 45% { opacity: 0; }
+  60%, 100% { opacity: 1; }
+}
+.hl-code-bar {
+  display: inline-block;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: hl-grow var(--dur-cinematic) var(--ease-expo) forwards;
+  animation-delay: calc(500ms + var(--i, 0) * 260ms);
+}
+.hl-code-line:nth-child(2) .hl-code-bar { background: var(--accent); }
+.hl-code-line:nth-child(3) .hl-code-bar { background: var(--accent-soft); }
+.hl-code-line:nth-child(4) .hl-code-bar { background: var(--text-faint); }
+.hl-code-line:nth-child(1) .hl-code-bar { background: var(--text-faint); }
+.hl-code-line:nth-child(5) .hl-code-bar { background: var(--text-mute); }
+@keyframes hl-grow {
+  to { transform: scaleX(1); }
+}
+.hl-code-line:nth-child(1) .hl-code-bar { width: 42%; }
+.hl-code-line:nth-child(2) .hl-code-bar { width: 72%; }
+.hl-code-line:nth-child(3) .hl-code-bar { width: 57%; }
+.hl-code-line:nth-child(4) .hl-code-bar { width: 88%; }
+.hl-code-line:nth-child(5) .hl-code-bar { width: 34%; }
+
+.hl-code-foot {
+  margin-top: 20px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(500ms + 5 * 260ms);
+}
+
+/* ── 亮点三 demo · 流程节点箭头自绘 ── */
+.hl-flow {
+  width: 100%;
+  height: 170px;
+  overflow: visible;
+}
+.hl-flow-line {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: hl-draw var(--dur-base) var(--ease-expo) forwards;
+  animation-delay: calc(320ms + var(--i, 0) * 420ms);
+}
+.hl-flow-arrow {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(480ms + var(--i, 0) * 420ms);
+}
+.hl-flow-node {
+  fill: var(--surface-2);
+  stroke: var(--rule);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+  animation: hl-pop var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(360ms + var(--i, 0) * 420ms);
+}
+.hl-flow g:last-child .hl-flow-node {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+}
+.hl-flow-label {
+  font-family: var(--font-display-cn);
+  font-size: 21px;
+  fill: var(--text);
+  font-weight: 600;
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(440ms + var(--i, 0) * 420ms);
+}
+
+/* ── 亮点四 demo · 五级 pipeline 进度 ── */
+.hl-demo-pl { position: relative; padding-top: 40px; }
+.hl-pl-track {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--rule);
+}
+.hl-pl-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  animation: hl-plfill var(--dur-slow) var(--ease-expo) forwards;
+  animation-delay: 340ms;
+}
+@keyframes hl-plfill {
+  to { width: 100%; }
+}
+.hl-pl-pulse {
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: hl-plrun var(--dur-slow) var(--ease-expo) forwards;
+  animation-delay: 340ms;
+}
+@keyframes hl-plrun {
+  0%   { left: 0; opacity: 0.15; }
+  15%  { opacity: 1; }
+  100% { left: calc(100% - 17px); opacity: 1; }
+}
+.hl-pl-stages {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.hl-pl-stage {
+  font-family: var(--font-display-cn);
+  font-size: clamp(19px, 1.8vw, 27px);
+  color: var(--text-2);
+  opacity: 0;
+  animation: hl-fade var(--dur-base) var(--ease-quart) forwards;
+  animation-delay: calc(360ms + var(--i, 0) * 180ms);
+}
+.hl-pl-stage:nth-last-child(-n + 2) { text-align: right; }
+
+/* 右下角 · 亮点序号（仅当前进度，非装饰角标） */
+.hl-slug {
+  position: absolute;
+  right: var(--stage-pad-x);
+  top: var(--stage-pad-y);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--hero-num-font);
+  font-style: var(--hero-num-style);
+  font-weight: var(--hero-num-weight);
+  color: var(--text-faint);
+  animation: hl-fade var(--dur-base) var(--ease-quart) both;
+}
+.hl-slug-num { font-size: 46px; color: var(--accent); }
+.hl-slug-txt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}

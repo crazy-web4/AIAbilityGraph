@@ -1,0 +1,152 @@
+[
+  {
+    "chapter": "coldopen",
+    "step": 1,
+    "text": "想系统地学 AI，从最基础的数学，一路走到能上线的应用。这条路要踩的知识点，少说几百个。有没有一套东西，帮你把整条路线一次理清？",
+    "audio": "coldopen/1.mp3"
+  },
+  {
+    "chapter": "coldopen",
+    "step": 2,
+    "text": "这套 AI 能力图谱教程，就是干这个的。它不是零散的笔记堆，而是把整个 AI 全栈能力，按一条清晰的主线，排成了一张图。",
+    "audio": "coldopen/2.mp3"
+  },
+  {
+    "chapter": "coldopen",
+    "step": 3,
+    "text": "从基础理论出发，穿过大模型的核心技术、工程化和应用开发，最后落到产品和资源。七个章节，完整覆盖。",
+    "audio": "coldopen/3.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 1,
+    "text": "这七章，硬核技术集中在前四章。",
+    "audio": "content-map/1.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 2,
+    "text": "第 1 章，AI 基础理论。数学和统计、经典机器学习、深度学习、还有 AI 的安全伦理。地基，都在这里。",
+    "audio": "content-map/2.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 3,
+    "text": "第 2 章，大模型核心技术。架构怎么设计、预训练和微调怎么做、LoRA 这类参数高效微调、还有多模态。一层层往里挖。",
+    "audio": "content-map/3.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 4,
+    "text": "第 3 章，大模型工程化。分布式训练、模型压缩量化、推理优化、训练数据处理、MLOps、模型评估与可解释性，工程侧该有的都有。",
+    "audio": "content-map/4.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 5,
+    "text": "第 4 章，大模型应用开发。API 开发、提示词工程、RAG、Agent、前端、后端。这部分，是真正上手做产品的地方。",
+    "audio": "content-map/5.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 6,
+    "text": "后三章，是让技术外溢到产品、工程和资源。",
+    "audio": "content-map/6.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 7,
+    "text": "第 5 章，AI 产品与业务。需求分析、产品设计、业务场景落地。",
+    "audio": "content-map/7.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 8,
+    "text": "第 6 章，算法工程能力。编程语言与框架、算法工程化、测试验证、工程化部署。",
+    "audio": "content-map/8.mp3"
+  },
+  {
+    "chapter": "content-map",
+    "step": 9,
+    "text": "第 7 章，AI 资源与成本。算力规划、模型服务容量、GPU 资源调度。",
+    "audio": "content-map/9.mp3"
+  },
+  {
+    "chapter": "highlights",
+    "step": 1,
+    "text": "整套做下来，分量相当足。38 个以上的文档，15 个以上的可运行代码示例，总字数 12 万起步。每一章，都是 100% 完成。",
+    "audio": "highlights/1.mp3"
+  },
+  {
+    "chapter": "highlights",
+    "step": 2,
+    "text": "它有四个亮点，特别值得你关注。",
+    "audio": "highlights/2.mp3"
+  },
+  {
+    "chapter": "highlights",
+    "step": 3,
+    "text": "最突出的，是成体系。七章从基础到高级，串成一条完整链路，不是散装的知识点。",
+    "audio": "highlights/3.mp3"
+  },
+  {
+    "chapter": "highlights",
+    "step": 4,
+    "text": "再来说代码。数学、机器学习、深度学习，每个知识点都有能直接跑起来的示例撑着。",
+    "audio": "highlights/4.mp3"
+  },
+  {
+    "chapter": "highlights",
+    "step": 5,
+    "text": "还有实战。API 开发、RAG 系统、Agent 架构、前后端应用，全都有完整流程。",
+    "audio": "highlights/5.mp3"
+  },
+  {
+    "chapter": "highlights",
+    "step": 6,
+    "text": "工程化也不含糊。分布式训练、推理优化、成本优化、多租户资源管理、CI/CD，都摊开讲了。",
+    "audio": "highlights/6.mp3"
+  },
+  {
+    "chapter": "learning-path",
+    "step": 1,
+    "text": "更贴心的是，它按身份给配了三条不同的学习路径。",
+    "audio": "learning-path/1.mp3"
+  },
+  {
+    "chapter": "learning-path",
+    "step": 2,
+    "text": "如果你是初学者，8 到 12 周。从第 1 章平推，再跳第 4 章、第 2 章、第 5 章。",
+    "audio": "learning-path/2.mp3"
+  },
+  {
+    "chapter": "learning-path",
+    "step": 3,
+    "text": "要打工程底子，走工程师线，10 到 14 周。前四章，再加第 6、7 章，几乎全走一遍，把工程能力夯扎实。",
+    "audio": "learning-path/3.mp3"
+  },
+  {
+    "chapter": "learning-path",
+    "step": 4,
+    "text": "做产品的，4 到 6 周就够。抓第 1、4、5、7 章，把技术看懂、业务想明白，就能派上用场。",
+    "audio": "learning-path/4.mp3"
+  },
+  {
+    "chapter": "action",
+    "step": 1,
+    "text": "想动手，从 README 开始就行。整份教程用 MIT License，代码和文档都能自由学、自由用。",
+    "audio": "action/1.mp3"
+  },
+  {
+    "chapter": "action",
+    "step": 2,
+    "text": "学到东西，欢迎一起来贡献。觉得它有用，就去 GitHub 点个 Star，这是我们持续更新的最大动力。",
+    "audio": "action/2.mp3"
+  },
+  {
+    "chapter": "action",
+    "step": 3,
+    "text": "那就从第 1 章开始，一起把 AI 学到底。",
+    "audio": "action/3.mp3"
+  }
+]
